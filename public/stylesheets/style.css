@@ -1,0 +1,122 @@
+html {
+  font-size: 1rem;
+  font-family: "Roboto", sans-serif;
+  height: 100%;
+}
+html h1,
+html h2,
+html h3,
+html h4 {
+  font-weight: 100;
+}
+html h1 {
+  font-family: "Roboto", sans-serif;
+  font-size: 63px;
+  line-height: 69.3px;
+  margin-bottom: 25.2px;
+  margin-top: 31.5px;
+  text-align: center;
+}
+html body {
+  height: 100%;
+  margin-bottom: 220px;
+  padding-top: 45px;
+  font: 14px "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+html body .left {
+  float: left;
+}
+html body .strong {
+  font-weight: bold;
+}
+html body header {
+  padding: 1em;
+  font-size: 18px;
+  margin-bottom: 21px;
+  line-height: 18px;
+}
+html body header a {
+  color: #808080;
+}
+html body header a :hover {
+  text-decoration: underline;
+}
+html body header nav.menu a.home {
+  min-height: 2.85714286em;
+  line-height: 21px;
+}
+html body header nav.menu a.home img {
+  width: 100px;
+  padding-right: 12px;
+}
+html body header nav.menu ul {
+  text-align: right;
+}
+html body header nav.menu ul li {
+  display: inline;
+}
+html body p {
+  font-weight: 300;
+  line-height: 1.5em;
+  font-size: 1.1rem;
+}
+.externe {
+  position: absolute;
+  left: -5000px;
+  width: 4000px;
+}
+a:hover {
+  text-decoration: underline;
+}
+.form-group::after {
+  clear: both;
+}
+.form-group::before,
+.form-group::after {
+  content: " ";
+  display: table;
+}
+.form-group label {
+  text-align: right;
+}
+.form-group:nth-child(1) {
+  position: absolute;
+  top: -2em;
+  left: 0;
+}
+footer {
+  font-size: 85%;
+  padding: 1em;
+  color: #fff;
+  background-color: #26353f;
+  text-shadow: none;
+}
+footer h5 {
+  font-size: 14px;
+  margin: 26px 0 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+footer .logo {
+  width: 150px;
+  height: 70px;
+}
+footer ul {
+  padding: 0;
+  list-style: none;
+  line-height: 1.78em;
+}
+footer li {
+  list-style-type: none;
+  text-align: left;
+}
+footer li a {
+  margin-left: 0.5em;
+  color: #fff;
+}
+footer li a:hover {
+  color: #fff;
+}
+.confirmation {
+  padding: 3em;
+}

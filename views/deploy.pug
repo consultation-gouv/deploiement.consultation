@@ -1,0 +1,33 @@
+extends layout
+
+block content
+    div(class="ui container")
+      form(id="form-deploy",class="ui form" action="", method="post")
+          h4(class="ui dividing header") Remplir les champs suivants pour lancer votre consultation sur #{tool.platformName || tool.name}
+          div(class="two fields")
+                    if tool.urlPlatform
+                        div(class="inline twelve wide field")
+                            label(for="slug") #[span.strong URL souhaitée] :
+                            span #{tool.urlPlatform}/
+                            input(id="slug",type="text",name="slug", value="", class="required")
+          div(class="six wide field required")
+            label(for="adminEmail") Email
+            input(id="adminEmail",type="text",name="adminEmail",value="")
+          div(class="six wide field required")
+              label(for="name") Nom de la consultation
+              input(id="name",type="text",name="name",value="")
+          div(class="six wide field required")
+              label(for="adminName") Prénom et nom
+              input(id="adminName",type="text",name="adminName",value="")
+          div(class="six wide field required")
+              label(for="adminOrganizationName") Organisation
+              input(id="adminOrganizationName",type="text",name="adminOrganizationName",value="")
+          input(id="toolName",type="hidden",name="toolName",value=tool.name)
+          input(id="hosting",type="hidden",name="hosting",value=tool.hosting)
+          input(id="register",type="hidden",name="type",value="register")
+          div(class="field required")
+              div(class="ui checkbox")
+                  input(id="cgu",class="hidden", tabindex="0", type="checkbox",name="checkbox")
+                  label(for="cgu") Je suis d'accord avec les #[a(href="#",target="_blank") CGU du site].
+          button(class="ui button", type="submit") Lancez votre consultation !
+          div(class="ui error message")

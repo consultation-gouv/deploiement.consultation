@@ -1,0 +1,40 @@
+{
+  "name": "portail",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "allcountjs": "^1.24.1",
+    "bluebird": "^3.4.6",
+    "body-parser": "^1.15.2",
+    "bootstrap": "^3.3.7",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.2.0",
+    "dotenv": "^2.0.0",
+    "express": "^4.14.0",
+    "forms-mongoose": "0.0.6",
+    "helmet": "^3.1.0",
+    "key-del": "^1.2.4",
+    "mongoose": "^4.6.6",
+    "morgan": "^1.7.0",
+    "node-uuid": "^1.4.7",
+    "ogp-consultation-verification": "^0.5.0",
+    "pug": "^2.0.0-beta11",
+    "rename-keys": "^1.1.2",
+    "sanitize-html": "^1.13.0",
+    "semantic-ui-css": "^2.2.9",
+    "serve-favicon": "~2.3.0",
+    "slugify": "^1.0.2",
+    "stylus": "0.54.5",
+    "unirest": "^0.5.1",
+    "validator": "^6.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0",
+    "livereload": "^0.6.0",
+    "uglify-js": "^2.7.4",
+    "watch": "^1.0.1"
+  }
+}

@@ -1,0 +1,13 @@
+{
+    "apps": [{
+        "name": "node-platform",
+        "script": "./bin/www",
+        "watch": true
+    },
+    {
+        "name": "node-apiserver",
+        "script": "./node_api_server/index.js",
+        "cwd": "./node_api_server",
+        "watch": true
+    }]
+}

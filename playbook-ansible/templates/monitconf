@@ -1,0 +1,53 @@
+# Refresh interval
+set daemon 1
+
+# Location of log file
+set logfile /var/log/monit.log
+set idfile /var/lib/monit/id
+set statefile /var/lib/monit/state
+
+# Configuration of smtp server for mail alert
+set mailserver smtp.sendgrid.com port 587
+username sendgriduser password sendgridpass
+# using TLSV1
+
+# Set custom mail format for alert
+set mail-format {
+from: monit@monitoring.domain
+reply-to: support@domain
+subject: Alerte : $EVENT - $DATE
+#message: Monit $ACTION $SERVICE le $DATE sur le serveur $HOST: $DESCRIPTION.
+}
+
+# Set admin mail
+set alert adminmail
+
+# Set dir where stock alert envents
+set eventqueue
+basedir /var/lib/monit/events
+
+# Set Web interface and access
+set httpd port 34942
+allow adminmail:pass
+
+# Set check system and service
+check system host
+if memory usage > 85% then alert
+if cpu usage (user) > 75% then alert
+if swap usage > 25% then alert
+
+#NGINX SERVER
+check process nginx with pidfile /var/run/nginx.pid
+start program = "/etc/init.d/nginx start"
+stop program = "/etc/init.d/nginx stop"
+
+#SSH SERVER
+check process sshd with pidfile /var/run/sshd.pid
+start program = "/etc/init.d/ssh start"
+stop program = "/etc/init.d/ssh stop"
+if failed port 22 protocol ssh then restart
+
+#NODE PLATFORM
+check process node-platform with pidfile /home/ogptoolbox/.pm2/pids/node-platform-0.pid
+#start program = "/usr/bin/sudo -u ogptoolbox /bin/bash -lc 'cd /home/ogptoolbox/ogptoolbox-platform /usr/bin/pm2 start ecosystem.json'"
+#stop program = "/usr/bin/sudo -u ogptoolbox /bin/bash -lc 'cd /home/ogptoolbox/ogptoolbox-platform /usr/bin/pm2 stop all'"

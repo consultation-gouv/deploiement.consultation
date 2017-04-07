@@ -1,0 +1,162 @@
+---
+swagger: "2.0"
+info:
+  description: "This document defines the API endpoints exposed by the French consultations\
+    \ portal platform for enabling SaaS providers on-demand deployment facilities.\n"
+  version: "0.2.0"
+  title: "French consultations portal platform endpoints definition"
+  license:
+    name: "MIT"
+    url: "https://opensource.org/licenses/MIT"
+host: "api.consultation.gouv.fr"
+basePath: "/"
+schemes:
+- "https"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /instanceRequests:
+    get:
+      description: "Gets the list of instance requests (scoped on the provider associated\
+        \ with the token).\n"
+      operationId: "instanceRequestsGET"
+      parameters: []
+      responses:
+        200:
+          description: "Successful response, an array of Instances"
+          schema:
+            $ref: "#/definitions/Instances"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      security:
+      - api_key: []
+      x-swagger-router-controller: "Default"
+  /instanceRequests/{id}:
+    patch:
+      summary: "Edit instance request informations."
+      description: "Changes some instance informations - in particular, the creation\
+        \ status,\nbut also the username and other metadata. The API Key used to\n\
+        authenticate this request must be associated to the instance provider.\n"
+      operationId: "instanceRequestsIdPATCH"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id of the instance request (this is the same as the `requestIdentifier`\
+          \ sent to the provider)"
+        required: true
+        type: "string"
+        format: "uuid"
+      - in: "body"
+        name: "payload"
+        description: "payload representing the instance edition data"
+        required: true
+        schema:
+          $ref: "#/definitions/InstanceEditionPayload"
+      responses:
+        200:
+          description: "The edited instance"
+          schema:
+            $ref: "#/definitions/Instance"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      security:
+      - api_key: []
+      x-swagger-router-controller: "Default"
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "X-Api-Key"
+    in: "header"
+definitions:
+  Error:
+    type: "object"
+    required:
+    - "message"
+    properties:
+      message:
+        type: "string"
+      errors:
+        type: "object"
+  Instance:
+    type: "object"
+    required:
+    - "adminEmail"
+    - "adminName"
+    - "id"
+    - "name"
+    - "slug"
+    - "status"
+    properties:
+      id:
+        type: "string"
+        description: "Id if the instance request. This is the same as the `requestIdentifier`\
+          \ sent to the provider"
+      name:
+        type: "string"
+        description: "Name of the instance / debate to create, as requested by the\
+          \ user."
+      slug:
+        type: "string"
+        description: "Slug of the instance to create, which will be used in the subdomain\
+          \ part of as a url path (depending on how the debate gets created)."
+      url:
+        type: "string"
+        format: "url"
+        description: "complete url where to find the debate"
+      status:
+        type: "string"
+        description: "status of the instance"
+        enum:
+        - "requested"
+        - "running"
+        - "failure"
+        - "terminated"
+      adminName:
+        type: "string"
+        description: "name of the instance admin user (may be in sync with the running\
+          \ instance, or as given in the request)"
+      adminEmail:
+        type: "string"
+        format: "email"
+        description: "email of the instance admin user (may be in sync with the running\
+          \ instance, or as given in the request)"
+      adminPhone:
+        type: "string"
+        description: "phone number of the instance admin user (may be in sync with\
+          \ the running instance, or as given in the request)"
+      adminOrganizationName:
+        type: "string"
+        description: "name of the organization of the admin user (may be in sync with\
+          \ the running instance, or as given in the request)"
+      metadata:
+        type: "object"
+  InstanceEditionPayload:
+    type: "object"
+    required:
+    - "status"
+    properties:
+      status:
+        type: "string"
+        description: "status of the instance"
+        enum:
+        - "running"
+        - "failure"
+        - "terminated"
+      metadata:
+        type: "object"
+  Instances:
+    type: "object"
+    required:
+    - "items"
+    properties:
+      items:
+        type: "array"
+        description: "List of the items"
+        items:
+          $ref: "#/definitions/Instance"
