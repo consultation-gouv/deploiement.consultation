@@ -468,8 +468,3 @@ Units Tests can be run on npm module ogptoolbox-platform-verification-consultati
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-
-
-# deploiement.consultation
-# deploiement.consultation
-# deploiement.consultation

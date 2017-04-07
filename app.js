@@ -27,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //access node_modules scripts
 app.use('/modules', express.static(__dirname + '/node_modules'));
 
+//route of application
 app.use(toolsRouter);
 
 // catch 404 and forward to error handler

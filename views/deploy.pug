@@ -2,7 +2,7 @@ extends layout
 
 block content
     div(class="ui container")
-      form(id="form-deploy",class="ui form" action="", method="post")
+      form(id="form-deploy",class="ui form" action="#", method="post")
           h4(class="ui dividing header") Remplir les champs suivants pour lancer votre consultation sur #{tool.platformName || tool.name}
           div(class="two fields")
                     if tool.urlPlatform
@@ -29,5 +29,5 @@ block content
               div(class="ui checkbox")
                   input(id="cgu",class="hidden", tabindex="0", type="checkbox",name="checkbox")
                   label(for="cgu") Je suis d'accord avec les #[a(href="#",target="_blank") CGU du site].
-          button(class="ui button", type="submit") Lancez votre consultation !
+          div(class="ui blue submit button") Lancez votre consultation !
           div(class="ui error message")
