@@ -17,6 +17,7 @@ const ocv = require('ogp-consultation-verification')(mongoose);
 //importation of  model mongoose for consultation and tools
 const consultation = require('../models/consultation');
 const tools = require('../models/tools');
+const domain = require('../models/domain');
 //generate unique id
 const uuid = require('node-uuid');
 //generate slug
@@ -87,6 +88,26 @@ router.get('/outils/:name', function(req, res, next) {
       }
   });
 });
+ var verify = function (data, callback) {
+  if (data) {
+	  const email = validator.normalizeEmail(data);
+	  const emailValid = validator.isEmail(email);
+	  const domainArray = [".(gouv)\.(fr)$", "(octo)\.(com)$"];
+	  const re = new RegExp(domainArray.join("|"), "i");
+	  if (emailValid && !email.match(re) )  { 
+		  const obj = {};
+		  obj.success = false;
+		  obj.msg  = 'Votre email n\'est pas autorisé pour déployer une consultation. Veuillez saisir un email terminant par ".gouv.fr"'; 
+		  callback(obj);
+	  } 
+  }
+ }
+
+router.post('/verify', function(req, res, next) {
+ verify(req.body.adminEmail, function(data) {
+  return res.json(data);
+ });
+});
 
 //POST new consultation : form validation, a consultation (with statut = requested is added to collection Consultations and mail is sent to asker
 router.post('/insert', function(req, res, next) {
@@ -97,6 +118,7 @@ router.post('/insert', function(req, res, next) {
   const re = new RegExp(domainArray.join("|"), "i");
   if (emailValid && !email.match(re) )  { 
       return res.json({
+          success: false,
           msg: 'Votre email n\'est pas autorisé pour déployer une consultation. Veuillez saisir un email terminant par ".gouv.fr"', 
           class:'alert-danger',
           title:'Attention ! ',
