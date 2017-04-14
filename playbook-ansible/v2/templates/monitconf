@@ -1,0 +1,69 @@
+# Refresh interval
+set daemon 1
+
+# Location of log file
+set logfile /var/log/monit.log
+set idfile /var/lib/monit/id
+set statefile /var/lib/monit/state
+
+# Configuration of smtp server for mail alert
+set mailserver smtp.sendgrid.com port 587
+username sendgriduser password sendgridpass
+# using TLSV1
+
+# Set custom mail format for alert
+set mail-format {
+from: monit@monitoring.domain
+reply-to: support@domain
+subject: Alerte : $EVENT - $DATE
+message: Monit $ACTION $SERVICE le $DATE sur le serveur $HOST: $DESCRIPTION.
+}
+
+# Set admin mail
+set alert adminmail
+
+# Set dir where stock alert envents
+set eventqueue
+basedir /var/lib/monit/events
+
+# Set Web interface and access
+set httpd port 39342
+allow huser:mdp
+
+# Set check system and service
+check system host
+if memory usage > 85% then alert
+if cpu usage (user) > 75% then alert
+if swap usage > 25% then alert
+
+#NGINX SERVER
+check process nginx with pidfile /var/run/nginx.pid
+start program = "/etc/init.d/nginx start"
+stop program = "/etc/init.d/nginx stop"
+
+#SSH SERVER
+check process sshd with pidfile /var/run/sshd.pid
+start program = "/etc/init.d/ssh start"
+stop program = "/etc/init.d/ssh stop"
+if failed port 22 protocol ssh then restart
+
+#MONGODB
+check process mongod with pidfile /var/run/mongod.pid
+start program = "/bin/bash -lc '/bin/systemctl start mongod.service'"
+stop program = "/bin/bash -lc '/bin/systemctl stop mongod.service'"
+restart program = "/bin/bash -lc '/bin/systemctl restart mongod.service'"
+if failed port 27017 then restart
+
+#NODE PLATFORM
+check process node-platform with pidfile /home/huser/.pm2/pids/node-platform-0.pid
+start program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 start 0'"
+stop program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 stop 0'"
+restart program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 restart 0'"
+if failed port 3000 then restart
+
+#NODE API SERVER
+check process node-api-server with pidfile /home/huser/.pm2/pids/node-apiserver-1.pid
+start program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 start 1'"
+stop program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 stop 1'"
+restart program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 restart 1'"
+if failed port 8080 then restart
