@@ -1,5 +1,5 @@
 ---
-- hosts: 192.168.210.234
+- hosts: preprod
   remote_user: root
 
   vars_prompt:
@@ -228,4 +228,4 @@
     service: name=monit state=restarted
 
   - name: Stop monit service
-    service: name=nginx state=restarted  
+    service: name=nginx state=restarted
