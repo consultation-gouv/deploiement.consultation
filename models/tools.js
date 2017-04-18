@@ -21,5 +21,19 @@ const toolSchema = new Schema({
   updatedAt: Date
 });    
 
+toolSchema.statics.findTool = function findTool (name, callback) {
+    /* FIND tool by name */ 
+    this.findOne({name: name}, function(err, t) {
+        if(err){
+            return callback(err);
+        } else if (t){
+            return callback(null,t);
+        } else {
+            return callback();
+        }
+    });
+};
+
 const tool = mongoose.model('tool', toolSchema);
+
 module.exports = tool;
