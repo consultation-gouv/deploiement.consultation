@@ -14,7 +14,21 @@ const consultationSchema = new Schema({
     toolname: {type: String, required: true},
     createdAt: Date,
     updatedAt: Date
-});    
+});
+
+
+
+consultationSchema.statics.findConsultation = function findConsultation (_id, callback) {
+    this.findById(_id, function(err, consult) {
+        if(err){
+            return callback(err);
+        } else if (t){
+            return callback(null,consult);
+        } else {
+            return callback();
+        }
+    });
+};
 
 // to return to clients a cleaner json object
 consultationSchema.set('toJSON', {transform: function(doc, ret, options) {

@@ -114,9 +114,9 @@ router.post('/insert', function(req, res, next) {
 /********************* CONFIRMATION ******************************/
 router.get('/confirmation/:URL', function(req, res) {
     const url = req.params.URL;
-    //return {success: true};
     //copy document "Consultation" from temporary collection to permanent collection thenn send POST request to Provider API to deploy
     ocv.confirmTempConsultation(url, function(err, consult) {
+
         //if consultation was confirmed in database
         if (consult) {
             //adapt consult object before sending to provider API
@@ -145,7 +145,7 @@ router.get('/confirmation/:URL', function(req, res) {
                                 const httpstatus = response.statusType;//1,2,3,4 ou 5
                                 if (httpstatus === 2) {//synchrone and asynchrone cases
                                     //update mongo collection consultation with data returnes (url and status)
-                                    consultation.findById(args.data.requestIdentifier, function(err, consult) {
+                                    consultation.findConsultation(args.data.requestIdentifier, function(err, consult) {
                                         //if (err) return response.status(500).send({error: err});
                                         const newstatus = response.body.status;
                                         const newurl = response.body.url;
