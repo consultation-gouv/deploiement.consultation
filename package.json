@@ -33,8 +33,11 @@
     "validator": "^6.1.0"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0",
+    "grunt": "^1.0.1",
+    "grunt-contrib-connect": "^1.0.2",
     "livereload": "^0.6.0",
+    "nodemon": "^1.11.0",
+    "swagger-mock-api": "^1.6.0",
     "uglify-js": "^2.7.4",
     "watch": "^1.0.1"
   }

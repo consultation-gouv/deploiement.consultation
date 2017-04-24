@@ -1,15 +1,29 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var stylus = require('stylus');
- 
-var toolsRouter = require('./routes/tools');
+'use strict';
 
-var app = express();
-var helmet = require('helmet');
+/*
+ * 
+ *
+ * MIT Licensed
+ */
+
+/**
+ * Module dependencies
+ */
+
+require('dotenv').config();//to get environnement variable 
+
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const stylus = require('stylus');
+const helmet = require('helmet');
+const mongoose = require('mongoose');                                      
+
+const port = process.env.PORT || 3000; 
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,11 +38,9 @@ app.use(cookieParser());
 app.use(stylus.middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-//access node_modules scripts
 app.use('/modules', express.static(__dirname + '/node_modules'));
 
-//route of application
-app.use(toolsRouter);
+app.use(require('./controllers'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -50,3 +62,20 @@ app.use(function(err, req, res, next) {
 app.use(helmet());
 
 module.exports = app;
+
+
+connect()
+  .on('error', console.log)
+  .on('disconnected', connect)
+  //.once('open', listen) does not work with nodemon
+  ;
+
+function listen () {
+  if (app.get('env') === 'test') return;
+  app.listen(port);
+  console.log('Express app started on port ' + port);
+}
+
+function connect () {
+  return mongoose.connect('mongodb://' + process.env.MONGOUSER+ ':' + process.env.MONGOPASSWD+'@' + process.env.MONGOHOST+':27017/db_deploy').connection; 
+}
