@@ -10,8 +10,17 @@ Les APIs ont été conçues à l'aide de Swagger (http://swagger.io/).
 
 ![](img/architecture-ogp-platform.png?raw=true)
 
+### APIs
+
 Spécifications de l'API Editeur et de l'API PLateforme: [api.Specs](https://github.com/consultation-gouv/specs-apis-deploiement)
 
+### technologies et modules utilisés
+- nginx
+- node.js / Express + module npm spécifique : https://github.com/consultation-gouv/npm.verif.consultation 
+- mocha et chai pour les tests
+- mongoDB
+- semantic UI
+- pm2 & monit
 
 ## Développement
 
@@ -46,7 +55,9 @@ MONGOHOST=mongo
 
 ### Base de données
 
-Il faut créer une base de données "db_deploy" contenant une base avec une collection "tools" contenant les informations des outils de la plateforme (voir schéma dans /models/tools.js).
+Il faut créer et peupler manuellement une base de données "db_deploy" contenant une collection "tools" contenant les informations des outils de la plateforme (voir schéma dans /models/tools.js). Pour le développement, le champs apikey des outils peut rester vide.
+
+Les collections consultation et temp_consultation sont créées par l'application.
 
 ## Déploiement
 
