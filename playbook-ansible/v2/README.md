@@ -6,5 +6,4 @@
 - add your ssh public key in root/.ssh/authorized_key file
 
 ## After the deployment
-- Add manually the images directory in /home/[user]/consultation-app/public/images
 - Restore the existent mongo dump in the new mongodb database of instance 
