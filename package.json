@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon ./bin/www",
+    "test":"mocha"
   },
   "dependencies": {
     "allcountjs": "^1.24.1",
@@ -35,9 +36,11 @@
     "validator": "^6.1.0"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "grunt": "^1.0.1",
     "grunt-contrib-connect": "^1.0.2",
     "livereload": "^0.6.0",
+    "mocha": "^3.3.0",
     "nodemon": "^1.11.0",
     "swagger-mock-api": "^1.6.0",
     "uglify-js": "^2.7.4",

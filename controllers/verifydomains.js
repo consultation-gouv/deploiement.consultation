@@ -23,7 +23,6 @@ const verify = function (data, callback) {
               }
 
               const re = new RegExp(output[0].join("|"), "i");
-
               const obj = {};
               if (!emailValid)  {
 				      obj.success = false;
