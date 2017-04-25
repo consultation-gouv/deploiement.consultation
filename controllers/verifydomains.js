@@ -16,12 +16,12 @@ const verify = function (data, callback) {
 		  if (err) {
 			  return console.log(err);
 		  }
-
+          //replace . (dot) by \. for regex to work
+          data = data.replace(/\./g,'\\.');
 		  parse(data,{delimiter: ","}, function(err, output){
               if (err) {
                   return console.log(err);
               }
-
               const re = new RegExp(output[0].join("|"), "i");
               const obj = {};
               if (!emailValid)  {
@@ -31,13 +31,12 @@ const verify = function (data, callback) {
               }
               else if (emailValid && !email.match(re) )  {
 					  obj.success = false;
-					  obj.status = 400;
+					  obj.status = 200;
 					  obj.msg  = 'Votre email n\'est pas autorisé pour déployer une consultation.';
 			  } else {
 				      obj.status= 200;
 					  obj.success = true;
 			  }
-			 // console.log(obj);
               callback(obj);
           });
 

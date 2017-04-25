@@ -78,7 +78,7 @@ router.post('/insert', function(req, res, next) {
               // Consultation already exists in temporary collection!
             } else {
                 res.json({
-                    success: true,
+                    success: false,
                     msg: 'Vous avez déjà une demande de consultation en cours de confirmation. Confirmez-la avant d\'en créer une autre.',
                     title: 'Attention !',
                     class: 'alert-danger'

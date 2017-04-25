@@ -110,12 +110,14 @@ $(document).ready(function () {
             serializeForm: true,
             onSuccess: function(response) {
                 // valid response and response.success = true
-                console.log(response);
+                $(this).parent('div').removeClass('error');
+                $('form').removeClass('error');
             },
-            onFailure: function(response) {
-                // request failed, or valid response but response.success = false
-                alert("Votre email n'est pas autorisé");
-                console.log(response);
+            onFailure: function(error) {
+                // valid response and response.success = false
+                $(this).parent('div').addClass('error');
+                $('form').addClass('error');
+                $('form .ui.message.error').text(error.msg);
             },
             onError: function(errorMessage) {
                 // invalid response
@@ -133,11 +135,12 @@ $(document).ready(function () {
             method : 'POST',
             onSuccess: function(response) {
                 // valid response and response.success = true
-                console.log(response);
+                $('form .ui.submit').addClass('disabled');
+                $('form .ui.message.success').removeClass('hidden').text(response.msg);
             },
-            onFailure: function(response) {
+            onFailure: function(error) {
                 // request failed, or valid response but response.success = false
-                console.log(response);
+                $('form .ui.message.error').removeClass('hidden').text(error.msg);
             },
             onError: function(errorMessage) {
                 // invalid response
