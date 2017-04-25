@@ -18,6 +18,7 @@ const unirest = require('unirest');
 //sanitize data form
 const sanitizeHtml = require('sanitize-html');
 
+const verif = require('../helpers/verification')();
 //generate temp consultation collection Model
 ocv.generateTempConsultationModel(consultation, function(err, tempConsultationModel) {
     if (err) {
@@ -40,72 +41,81 @@ form validation, a consultation (with statut = requested is added to collection 
  *****************************************************************/
 router.post('/insert', function(req, res, next) {
     const email = req.body.adminEmail;
-    //if user want to register a consultation
-    if (req.body.type === 'register') {
+    //verify  if email is authorized !
+    verif.verify(email, function(data) {
+        if (data.success !== false) {
+            //if user want to register a consultation
+            if (req.body.type === 'register') {
 
-        const newConsult = new consultation({
-            _id: uuid.v1(),//verifier si unique
-            slug: sanitizeHtml(req.body.slug),
-            adminEmail: sanitizeHtml(email),
-            name: sanitizeHtml(req.body.name),
-            adminName: sanitizeHtml(req.body.adminName),
-            adminOrganizationName: sanitizeHtml(req.body.adminOrganizationName),
-            toolname: sanitizeHtml(req.body.toolName)
-            //checkbox: sanitizeHtml(req.body.checkbox)
-        });
+                const newConsult = new consultation({
+                    _id: uuid.v1(),//verifier si unique
+                    slug: sanitizeHtml(req.body.slug),
+                    adminEmail: sanitizeHtml(email),
+                    name: sanitizeHtml(req.body.name),
+                    adminName: sanitizeHtml(req.body.adminName),
+                    adminOrganizationName: sanitizeHtml(req.body.adminOrganizationName),
+                    toolname: sanitizeHtml(req.body.toolName)
+                    //checkbox: sanitizeHtml(req.body.checkbox)
+                });
 
-        ocv.createTempConsultation(newConsult, function(err, existingPersistentConsultation, newTempConsultation) {
-            if (err) {
-                return res.send('ERROR: creating temp consultation FAILED');
-            }
-
-            // new consultation created
-            if (newTempConsultation) {
-                const URL = newTempConsultation[ocv.options.URLFieldName];
-                //an email is sent to confirm deployment
-                ocv.sendVerificationEmail(email, URL, function(err, info) {
+                ocv.createTempConsultation(newConsult, function (err, existingPersistentConsultation, newTempConsultation) {
                     if (err) {
-                        return res.send('ERROR: sending verification email FAILED');
+                        return res.send('ERROR: creating temp consultation FAILED');
                     }
-                    res.json({
-                        success: true,
-                        msg: 'Un email vient de vous être envoyé pour confirmer votre demande.',
-                        class: 'alert-success',
-                        title: 'Bravo ! ',
-                        info: info
-                    });
+
+                    // new consultation created
+                    if (newTempConsultation) {
+                        const URL = newTempConsultation[ocv.options.URLFieldName];
+                        //an email is sent to confirm deployment
+                        ocv.sendVerificationEmail(email, URL, function (err, info) {
+                            if (err) {
+                                return res.send('ERROR: sending verification email FAILED');
+                            }
+                            res.json({
+                                success: true,
+                                msg: 'Un email vient de vous être envoyé pour confirmer votre demande.',
+                                class: 'alert-success',
+                                title: 'Bravo ! ',
+                                info: info
+                            });
+                        });
+                        // Consultation already exists in temporary collection!
+                    } else {
+                        res.json({
+                            success: false,
+                            msg: 'Vous avez déjà une demande de consultation en cours de confirmation. Confirmez-la avant d\'en créer une autre.',
+                            title: 'Attention !',
+                            class: 'alert-danger'
+                        });
+                    }
                 });
-              // Consultation already exists in temporary collection!
+                /* if type != register resend verification button was clicked*/
             } else {
-                res.json({
-                    success: false,
-                    msg: 'Vous avez déjà une demande de consultation en cours de confirmation. Confirmez-la avant d\'en créer une autre.',
-                    title: 'Attention !',
-                    class: 'alert-danger'
+                ocv.resendVerificationEmail(email, function (err, userFound) {
+                    if (err) {
+                        return res.status(404).send('ERROR: resending verification email FAILED');
+                    }
+                    if (userFound) {
+                        res.json({
+                            msg: 'Une demande de confirmation vous a à nouveau été envoyée par email.',
+                            title: 'Bravo ! ',
+                            class: 'alert-success'
+                        });
+                    } else {
+                        res.json({
+                            msg: 'Votre code de vérification a expiré. Merci de soumettre à nouveau votre demande.',
+                            title: 'Attention ! ',
+                            class: 'alert-danger'
+                        });
+                    }
                 });
             }
-        });
-        /* if type != register resend verification button was clicked*/
         } else {
-            ocv.resendVerificationEmail(email, function(err, userFound) {
-                if (err) {
-                     return res.status(404).send('ERROR: resending verification email FAILED');
-                }
-                if (userFound) {
-                    res.json({
-                        msg: 'Une demande de confirmation vous a à nouveau été envoyée par email.',
-                        title: 'Bravo ! ',
-                        class: 'alert-success'
-                    });
-                } else {
-                    res.json({
-                        msg: 'Votre code de vérification a expiré. Merci de soumettre à nouveau votre demande.',
-                        title: 'Attention ! ',
-                        class: 'alert-danger'
-                    });
-                }
-            });
+            //email is not authorized, send message
+            return res.status(data.status).json(data);
         }
+
+    });
 });
 
 
