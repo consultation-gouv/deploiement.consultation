@@ -86,6 +86,9 @@
   - name: Install pm2
     npm: name=pm2 global=yes
 
+  - name: Stop monit service
+    service: name=monit state=stopped
+
   - name: Install pymongo module
     pip: name=pymongo
 
@@ -95,8 +98,9 @@
   - name: Configure mongodb DB superuser
     mongodb_user: database=admin name={{ mongosu }} password={{ mongosupass }} state=present roles='root'
     no_log: true
-    notify:
-      - restart mongod
+
+  - name: Restart mongod service
+    service: name=mongod state=restarted enabled=true
 
   - name: Configure mongodb DB {{ user }} user
     mongodb_user: login_user={{ mongosu }} login_password={{ mongosupass }} database=db_deploy name={{ user }} password={{ mongogppass }} state=present roles='readWrite'
@@ -105,8 +109,9 @@
 
   - name: Set mongodb PID file
     file: src=/var/lib/mongodb/mongod.lock dest=/var/run/mongod.pid state=link
-    notify:
-      - restart mongod
+
+  - name: Restart mongod service
+    service: name=mongod state=restarted enabled=true
 
   - name: Clone consultation-app from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/deploiement.consultation.git dest=/home/{{ user }}/consultation-app force=yes
@@ -120,13 +125,15 @@
   - name: Configure consultation-app to connecting with mongodb
     template: src=templates/db_connect.j2 dest=/home/{{ user }}/consultation-app/mongo/db_connect.js
 
+  - name: Add images to consultation-app
+    copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
+    no_log: true
+
   - name: Set connection mongo users credential
     command: "{{ item }}"
     with_items:
       - sed -i 's/user/{{ user }}/' /home/{{ user }}/consultation-app/mongo/db_connect.js
       - sed -i 's/pass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/mongo/db_connect.js
-    notify:
-      - stop nginx
     no_log: true
 
 #  - name: Get ssl certificate for website, app and monit interface
@@ -158,11 +165,12 @@
       - sed -i 's/$user/{{ user }}/' /etc/nginx/sites-available/default
       - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/deploiement.{{ domainname }}
       - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/monitoring.{{ domainname }}
-    notify:
-      - restart nginx
 
   - name: create .env file
     template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env
+
+  - name: create .env file for api server
+    template: src=templates/env_file-api dest=/home/{{ user }}/consultation-app/node_api_server/.env
 
   - name: set variable on .env file
     command: "{{ item }}"
@@ -172,10 +180,9 @@
       - sed -i 's/domain/{{ domainname }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/.env
+      - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/node_api_server/.env
+      - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/node_api_server/.env
     no_log: true
-
-#  - name: Configure ecosystem
-#    template: src=templates/ecosystem.json dest=/home/{{ user }}/consultation-app/ecosystem.json
 
   - name: correct packages.json
     command: "{{ item }}"
@@ -189,6 +196,11 @@
       - /home/{{ user }}/consultation-app
       - /home/{{ user }}/consultation-app/node_modules
 
+  - name: copy reference database dump to instance
+    copy: src=~/consultation-app_ansible-playbook-v2/mongodump-pprod dest=/home/{{ user }}/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
+
+  - name: fill in database from the dump
+    command: "/usr/bin/mongorestore mongodump-pprod/ chdir=/home/{{ user }}/"
 
   - name: Install required node packages and launch platform
     command: "{{ item }} chdir=/home/{{ user }}/consultation-app"
@@ -197,6 +209,9 @@
       - npm install
       - sudo -u {{ user }} bash -lc "cd /home/{{ user }}/consultation-app/node_api_server && npm install"
       - sudo -u {{ user }} bash -lc "cd /home/{{ user }}/consultation-app && pm2 start ecosystem.json"
+      - sudo -u {{ user }} bash -lc "pm2 stop 0"
+      - sudo -u {{ user }} bash -lc "pm2 start 0"
+
 
   - name: Install Ruby with RVM
     script: file/install-rvm.sh
@@ -213,9 +228,6 @@
     file: path={{ item }} owner={{ user }} group={{ user }} mode=755 recurse=yes
     with_items:
       - /home/{{ user }}/consultation-website
-
-  - name: Stop monit service
-    service: name=monit state=stopped
 
   - name: copy default configuration of monitoring server
     command: cp /etc/monit/monitrc /etc/monit/monitrc.default
@@ -240,3 +252,9 @@
 
   - name: restart nginx service
     service: name=nginx state=restarted
+
+  - name: disable ssh root access
+    command: sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+
+  - name: restart
+    service: name=ssh state=restarted

@@ -40,11 +40,15 @@ if swap usage > 25% then alert
 check process nginx with pidfile /var/run/nginx.pid
 start program = "/etc/init.d/nginx start"
 stop program = "/etc/init.d/nginx stop"
+restart program = "/etc/init.d/nginx restart"
+if failed port 80 protocol http then restart
+
 
 #SSH SERVER
 check process sshd with pidfile /var/run/sshd.pid
 start program = "/etc/init.d/ssh start"
 stop program = "/etc/init.d/ssh stop"
+restart program = "/etc/init.d/ssh restart"
 if failed port 22 protocol ssh then restart
 
 #MONGODB
@@ -67,3 +71,9 @@ start program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 start 1'"
 stop program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 stop 1'"
 restart program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 restart 1'"
 if failed port 8080 then restart
+
+#FAIL2BAN
+check process fail2ban with pidfile /var/run/fail2ban/fail2ban.pid
+start program = "/etc/init.d/fail2ban start"
+stop program = "/etc/init.d/fail2ban stop"
+restart program = "/etc/init.d/restart restart"
