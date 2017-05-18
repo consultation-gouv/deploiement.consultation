@@ -68,7 +68,7 @@ Le déploiement de l'application est automatisé. Voir les scripts Ansible et le
 ```
 npm test
 ```
-to do : 
+Propositions de tests : 
 - test "end to end" création consultation et confirmation. Nécessite mock API éditeurs (voir [api.spec](https://github.com/consultation-gouv/specs-apis-deploiement)) 
 
 ## License
