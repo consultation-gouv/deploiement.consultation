@@ -59,9 +59,9 @@ Il faut créer et peupler manuellement une base de données "db_deploy" contenan
 
 Les collections consultation et temp_consultation sont créées par l'application.
 
-### Mise à jour domaine email autorisé
+### Mise à jour les noms de domaine mail autorisés
 
-Pour ajouter des domaine mail dans la liste des domaines autorisé sur le formulaire, il suffit d'ajouter le nom de domaine à la fin de la ligne du fichier _domain\_consultation.csv_ comme ci dessous : 
+Pour ajouter des domaines mail dans la liste des domaines autorisés sur le formulaire de la plateforme, il suffit d'ajouter le nom de domaine comme ci dessous à la fin de la ligne du fichier _domain\_consultation.csv_ présent à la racine du projet.
 
 ```
 email1.com,email2.com,email3.com,votrenomdedomaine.fr
