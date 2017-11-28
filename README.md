@@ -61,7 +61,7 @@ Les collections consultation et temp_consultation sont créées par l'applicatio
 
 ### Modifier les noms de domaine mail autorisés sur la plateforme
 
-Pour ajouter des domaines mail dans la liste des domaines autorisés sur le formulaire de la plateforme, il suffit d'ajouter le nom de domaine comme ci dessous à la fin de la ligne du fichier **_domain\_consultation.csv_** présent à la racine du projet.
+Pour ajouter des domaines mail dans la liste des domaines autorisés sur le formulaire de la plateforme, il suffit d'ajouter le nom de domaine comme ci dessous à la fin de la ligne du fichier **_domain\_consultation.csv_** présent à la racine du projet, il n'y a pas besoin de redémarrer l'application pour que la modification soit effectif. 
 
 ```
 email1.com,email2.com,email3.com,votrenomdedomaine.fr
