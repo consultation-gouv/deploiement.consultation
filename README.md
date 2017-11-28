@@ -59,6 +59,14 @@ Il faut créer et peupler manuellement une base de données "db_deploy" contenan
 
 Les collections consultation et temp_consultation sont créées par l'application.
 
+### Mise à jour domaine email autorisé
+
+Pour ajouter des domaine mail dans la liste des domaines autorisé sur le formulaire, il suffit d'ajouter le nom de domaine à la fin de la ligne du fichier _domain\_consultation.csv_ comme ci dessous : 
+
+```
+email1.com,email2.com,email3.com,votrenomdedomaine.fr
+```
+
 ## Déploiement
 
 Le déploiement de l'application est automatisé. Voir les scripts Ansible et le README dans le répertoire [playbook-ansible/v2/](playbook-ansible/v2) 
