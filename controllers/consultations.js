@@ -4,7 +4,7 @@ const express = require('express'),
 
 const mongoose = require('mongoose');
 //main module to verify and confirm a consultation deployment request
-const ocv = require('ogp-consultation-verification')(mongoose);
+const ocv = require('consultation-verification')(mongoose);
 //importation of  model mongoose for consultation
 const consultation = require('../models/consultation');
 const tools = require('../models/tools');
