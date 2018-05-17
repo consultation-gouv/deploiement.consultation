@@ -11,7 +11,7 @@
     "bluebird": "^3.4.6",
     "body-parser": "^1.15.2",
     "bootstrap": "^3.3.7",
-    "consultation-verification": "^0.5.0",
+    "nodemailer": "3.1.4",
     "cookie-parser": "~1.4.3",
     "csv-parse": "^1.2.0",
     "debug": "~2.2.0",
