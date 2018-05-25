@@ -57,7 +57,7 @@ MONGOHOST=mongo
 
 Il faut créer et peupler manuellement une base de données "db_deploy" contenant une collection "tools" contenant les informations des outils de la plateforme (voir schéma dans /models/tools.js). Pour le développement, le champs apikey des outils peut rester vide.
 
-Les collections consultation et temp_consultation sont créées par l'application.
+Les collections consultation et temporary_consultation sont créées par l'application.
 
 ### Modifier les noms de domaine mail autorisés sur la plateforme
 
