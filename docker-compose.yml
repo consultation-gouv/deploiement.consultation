@@ -8,6 +8,8 @@ services:
       - ./docker/nginx/data/nginx:/home/http
       depends_on:
       - node
+      ports:
+          - "0.0.0.0:80:80"
     node:
       build: .
       volumes:
