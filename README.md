@@ -32,10 +32,16 @@ Spécifications de l'API Editeur et de l'API PLateforme: [api.Specs](https://git
 
 ### Variables d'environnement
 
-Renommer le fichier env.template en .env
+Il est possible d'utiliser directement le fichier env.docker
 
 ```shell
-mv env.template .env
+cp env.docker .env
+```
+
+On peut auss partir du fichier env.template
+
+```shell
+cp env.template .env
 ```
 
 Editer les informations :
@@ -44,6 +50,7 @@ Editer les informations :
 SENDGRIDUSER=apikey
 SENDGRIDPASS=<votre apiKey>
 URLPLATFORM=l'url de votre plateforme (http://consultation.local par exemple)
+DOMAIN=votre domain, consultation.local par exemple
 MONGOUSER= 
 MONGOPASSWD=
 MONGOHOST=mongo
