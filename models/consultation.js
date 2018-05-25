@@ -22,7 +22,8 @@ consultationSchema.statics.findConsultation = function findConsultation (_id, ca
     this.findById(_id, function(err, consult) {
         if(err){
             return callback(err);
-        } else if (t){
+        //} else if (t){
+        } else if (consult){
             return callback(null,consult);
         } else {
             return callback();
