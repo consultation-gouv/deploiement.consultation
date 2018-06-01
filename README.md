@@ -32,10 +32,16 @@ Spécifications de l'API Editeur et de l'API PLateforme: [api.Specs](https://git
 
 ### Variables d'environnement
 
-Renommer le fichier env.template en .env
+Il est possible d'utiliser directement le fichier env.docker
 
 ```shell
-mv env.template .env
+cp env.docker .env
+```
+
+On peut auss partir du fichier env.template
+
+```shell
+cp env.template .env
 ```
 
 Editer les informations :
@@ -44,6 +50,7 @@ Editer les informations :
 SENDGRIDUSER=apikey
 SENDGRIDPASS=<votre apiKey>
 URLPLATFORM=l'url de votre plateforme (http://consultation.local par exemple)
+DOMAIN=votre domain, consultation.local par exemple
 MONGOUSER= 
 MONGOPASSWD=
 MONGOHOST=mongo
@@ -61,7 +68,7 @@ Les collections consultation et temporary_consultation sont créées par l'appli
 
 ### Modifier les noms de domaine mail autorisés sur la plateforme
 
-Pour ajouter des domaines mail dans la liste des domaines autorisés sur le formulaire de la plateforme, il suffit d'ajouter le nom de domaine comme ci dessous à la fin de la ligne du fichier **_domain\_consultation.csv_** présent à la racine du projet, il n'y a pas besoin de redémarrer l'application pour que la modification soit effectif. 
+Pour ajouter des domaines mail dans la liste des domaines autorisés sur le formulaire de la plateforme, il suffit d'ajouter le nom de domaine comme ci dessous à la fin de la ligne du fichier **_domain\_consultation.csv_** présent à la racine du projet, il n'y a pas besoin de redémarrer l'application pour que la modification soit effective. 
 
 ```
 email1.com,email2.com,email3.com,votrenomdedomaine.fr

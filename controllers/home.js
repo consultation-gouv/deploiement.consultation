@@ -5,7 +5,7 @@ const express = require('express'),
 
 router.get('/', function(req, res) {
 	res.statusCode = 302;
-	res.setHeader("Location", 'https://consultation.etalab.gouv.fr');
+	res.setHeader("Location", process.env.URLPLATFORM);
 	//res.setHeader("Location", 'https://ogptoolbox.org/fr/collections/1');
 	res.end();
 });
