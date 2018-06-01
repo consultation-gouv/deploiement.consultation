@@ -69,15 +69,24 @@ router.post('/insert', function(req, res, next) {
                         //an email is sent to confirm deployment
                         ocv.sendVerificationEmail(email, URL, function (err, info) {
                             if (err) {
-                                return res.send('ERROR: sending verification email FAILED');
-                            }
-                            res.json({
-                                success: true,
-                                msg: 'Un email vient de vous être envoyé pour confirmer votre demande.',
-                                class: 'alert-success',
-                                title: 'Bravo ! ',
-                                info: info
-                            });
+			        console.log(err);
+                                res.json({
+				    success: false,
+                                    msg: "Impossible d'envoyer l'email de confirmation",
+                                    title: 'Attention !',
+                                    class: 'alert-danger',
+				    err: err,
+				    info: err
+				});
+                            } else {
+                                  res.json({
+                                      success: true,
+                                      msg: 'Un email vient de vous être envoyé pour confirmer votre demande.',
+                                      class: 'alert-success',
+                                      title: 'Bravo ! ',
+                                      info: info
+				  });
+			    }
                         });
                         // Consultation already exists in temporary collection!
                     } else {
@@ -175,7 +184,7 @@ router.get('/confirmation/:URL', function(req, res) {
                                     obj = {
                                         success: false,
                                         title: 'ERREUR : quelque chose s\'est mal passé.',
-                                        msg: response.body.message
+                                        msg: response.body ? response.body.message : "No body"
                                     };
                                 }
                                 //rendu html avec message correspondant (confirmation ou erreur)
