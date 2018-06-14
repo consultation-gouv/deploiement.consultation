@@ -18,6 +18,7 @@ services:
         - .:/usr/src/app
       depends_on:
         - mongo
+        - node
       ports:
           - "0.0.0.0:8090:8080"
       command: "npm start"
