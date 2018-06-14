@@ -7,7 +7,7 @@ services:
       - ./docker/nginx/log/nginx:/var/log/nginx
       - ./docker/nginx/data/nginx:/home/http
       depends_on:
-      - node
+      - platform
       - api
       ports:
           - "0.0.0.0:80:80"
@@ -18,11 +18,13 @@ services:
         - .:/usr/src/app
       depends_on:
         - mongo
-        - node
+        - platform
       ports:
           - "0.0.0.0:8090:8080"
-      command: "npm start"
-    node:
+      # FIXME: super nasty, but the api requires code from ../, meaning
+      # the node component must already have all its dependencies 
+      command: "bash -c 'sleep 60 ; npm start'"
+    platform:
       build: .
       volumes:
         - .:/usr/src/app
