@@ -184,11 +184,11 @@
       - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/node_api_server/.env
     no_log: true
 
-  - name: correct packages.json
-    command: "{{ item }}"
-    with_items:
-      - sed -i 's/consultation-verification/nodemailer/' /home/{{ user }}/consultation-app/package.json
-      - sed -i 's/"^0.5.0"/"3.1.4"/' /home/{{ user }}/consultation-app/package.json
+  # - name: correct packages.json
+  #   command: "{{ item }}"
+  #   with_items:
+  #     - sed -i 's/consultation-verification/nodemailer/' /home/{{ user }}/consultation-app/package.json
+  #     - sed -i 's/"^0.5.0"/"3.1.4"/' /home/{{ user }}/consultation-app/package.json
 
   - name: Change owner of consultation-app
     file: path={{ item }} owner={{ user }} group={{ user }} mode=755 recurse=yes state=directory
@@ -205,7 +205,7 @@
   - name: Install required node packages and launch platform
     command: "{{ item }} chdir=/home/{{ user }}/consultation-app"
     with_items:
-      - npm install -g ogp-consultation-verification
+      # - npm install -g ogp-consultation-verification
       - npm install
       - sudo -u {{ user }} bash -lc "cd /home/{{ user }}/consultation-app/node_api_server && npm install"
       - sudo -u {{ user }} bash -lc "cd /home/{{ user }}/consultation-app && pm2 start ecosystem.json"
