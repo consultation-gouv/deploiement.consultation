@@ -23,7 +23,7 @@ services:
           - "0.0.0.0:8090:8080"
       # FIXME: super nasty, but the api requires code from ../, meaning
       # the node component must already have all its dependencies 
-      command: "bash -c 'sleep 60 ; npm start'"
+      command: "bash -c 'sleep 120 ; npm start'"
     platform:
       build: .
       volumes:
