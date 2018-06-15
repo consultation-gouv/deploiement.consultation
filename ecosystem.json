@@ -6,7 +6,7 @@
     },
     {
         "name": "node-apiserver",
-        "script": "./node_api_server/index.js",
+        "script": "npm start",
         "cwd": "./node_api_server",
         "watch": true
     }]
