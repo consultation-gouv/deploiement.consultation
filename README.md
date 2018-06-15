@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sdelafond/deploiement.consultation.svg?branch=master)](https://travis-ci.org/sdelafond/deploiement.consultation)
+
 # Plateforme de consultation
 
 La plateforme de consultation permet aux administrations françaises de déployer des outils de consultations en ligne.
@@ -36,15 +38,16 @@ Il est possible d'utiliser directement le fichier env.docker
 
 ```shell
 cp env.docker .env
+ln -sf ../.env node_api_server/
 ```
 
-On peut auss partir du fichier env.template
+On peut aussi partir du fichier env.template
 
 ```shell
 cp env.template .env
 ```
 
-Editer les informations :
+Puis éditer les informations :
 
 ```
 SENDGRIDUSER=apikey

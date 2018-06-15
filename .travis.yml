@@ -1,0 +1,18 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - cp env.docker .env
+  - ln -sf ../.env node_api_server/
+  - docker-compose build
+  - docker-compose up &
+  # FIXME: please...
+  - sleep 240
+  # nginx answers
+  - curl -f localhost:80
+  # platform answers
+  - curl -f localhost:3000
+  # api answers
+  - test $(curl -s -o /dev/null -w '%{http_code}' localhost:8090) == '404'
