@@ -161,11 +161,17 @@
   - name: Set app web front
     template: src=templates/nginx-front-ssl_app.conf dest=/etc/nginx/sites-available/deploiement.{{ domainname }}
 
+  - name: Set api web front
+    template: src=templates/nginx-front-ssl_api.conf dest=/etc/nginx/sites-available/api.{{ domainname }}
+
   - name: Set monitoring web front
     template: src=templates/nginx-front-ssl_monit.conf dest=/etc/nginx/sites-available/monitoring.{{ domainname }}
 
   - name: enable app site
     file: src=/etc/nginx/sites-available/deploiement.{{ domainname }} dest=/etc/nginx/sites-enabled/deploiement.{{ domainname }} state=link
+
+  - name: enable api site
+    file: src=/etc/nginx/sites-available/api.{{ domainname }} dest=/etc/nginx/sites-enabled/api.{{ domainname }} state=link
 
   - name: enable monitoring site
     file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
@@ -176,6 +182,7 @@
       - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/default
       - sed -i 's/$user/{{ user }}/' /etc/nginx/sites-available/default
       - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/deploiement.{{ domainname }}
+      - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/api.{{ domainname }}
       - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/monitoring.{{ domainname }}
 
   - name: create .env file
