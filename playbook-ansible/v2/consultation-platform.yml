@@ -6,6 +6,10 @@
     mongodump_archive: "consultation-tools.mongodump.gz"
 
   vars_prompt:
+    - name: "env"
+      prompt: "Choose the environment (pprod or production)"
+      private: no
+
     - name: "user"
       prompt: "Choose the app's username in the server"
       private: no
@@ -131,7 +135,7 @@
 #    git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes version=hosting
 
   - name: Clone consultation-website from repository
-    git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes
+    git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes refspec={{ env }}
 
   # - name: Configure consultation-app to connecting with mongodb
   #   template: src=templates/db_connect.j2 dest=/home/{{ user }}/consultation-app/mongo/db_connect.js
