@@ -61,7 +61,7 @@
   - name: Add '{{ user }}' to sudoers
     template: src=templates/sudoers-user.j2 dest=/etc/sudoers validate='visudo -cf %s'
 
-  - name: Add master's public key to '{{ user }}' in instance
+  - name: Add master public key to '{{ user }}' in instance
     authorized_key: user={{ user }} key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
   - name: Add repo in apt sources
@@ -131,9 +131,6 @@
   - name: Clone consultation-app from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/deploiement.consultation.git dest=/home/{{ user }}/consultation-app force=yes
 
-#  - name: Clone consultation-website from repository
-#    git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes version=hosting
-
   - name: Clone consultation-website from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes refspec={{ env }}
 
@@ -182,12 +179,15 @@
       - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/monitoring.{{ domainname }}
 
   - name: create .env file
+    # FIXME: use proper j2 template
     template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env
 
   - name: create .env file for api server
+    # FIXME: use proper j2 template
     template: src=templates/env_file-api dest=/home/{{ user }}/consultation-app/node_api_server/.env
 
   - name: set variable on .env file
+    # FIXME: use proper j2 template
     command: "{{ item }}"
     with_items:
       - sed -i 's/sendgriduser/{{ sendgriduser }}/' /home/{{ user }}/consultation-app/.env
