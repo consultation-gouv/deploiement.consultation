@@ -133,19 +133,19 @@
   - name: Clone consultation-website from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes
 
-  - name: Configure consultation-app to connecting with mongodb
-    template: src=templates/db_connect.j2 dest=/home/{{ user }}/consultation-app/mongo/db_connect.js
+  # - name: Configure consultation-app to connecting with mongodb
+  #   template: src=templates/db_connect.j2 dest=/home/{{ user }}/consultation-app/mongo/db_connect.js
 
-  - name: Add images to consultation-app
-    copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
-    no_log: true
+  # - name: Add images to consultation-app
+  #   copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
+  #   no_log: true
 
-  - name: Set connection mongo users credential
-    command: "{{ item }}"
-    with_items:
-      - sed -i 's/user/{{ user }}/' /home/{{ user }}/consultation-app/mongo/db_connect.js
-      - sed -i 's/pass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/mongo/db_connect.js
-    no_log: true
+  # - name: Set connection mongo users credential
+  #   command: "{{ item }}"
+  #   with_items:
+  #     - sed -i 's/user/{{ user }}/' /home/{{ user }}/consultation-app/mongo/db_connect.js
+  #     - sed -i 's/pass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/mongo/db_connect.js
+  #   no_log: true
 
 #  - name: Get ssl certificate for website, app and monit interface
 #    command: "{{ item }}"
@@ -194,12 +194,6 @@
       - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/node_api_server/.env
       - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/node_api_server/.env
     no_log: true
-
-  # - name: correct packages.json
-  #   command: "{{ item }}"
-  #   with_items:
-  #     - sed -i 's/consultation-verification/nodemailer/' /home/{{ user }}/consultation-app/package.json
-  #     - sed -i 's/"^0.5.0"/"3.1.4"/' /home/{{ user }}/consultation-app/package.json
 
   - name: Change owner of consultation-app
     file: path={{ item }} owner={{ user }} group={{ user }} mode=755 recurse=yes state=directory
