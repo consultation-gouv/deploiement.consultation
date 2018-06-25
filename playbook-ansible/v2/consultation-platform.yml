@@ -246,7 +246,7 @@
   - name: Set configuration for monitoring
     template: src=templates/monitconf dest=/etc/monit/monitrc
 
-  - name: Set monit crendential in monitoring conf
+  - name: Set monit credentials in monitoring conf
     command: "{{ item }}"
     with_items:
       - sed -i 's/host/{{ domainname }}/' /etc/monit/monitrc
@@ -265,7 +265,7 @@
     service: name=nginx state=restarted
 
   - name: disable ssh root access
-    command: sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+    command: sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/' /etc/ssh/sshd_config
 
   - name: restart
     service: name=ssh state=restarted
