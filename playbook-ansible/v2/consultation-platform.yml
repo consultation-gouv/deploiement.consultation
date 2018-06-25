@@ -1,5 +1,5 @@
 ---
-- hosts: 192.168.210.234
+- hosts: pprod
   remote_user: root
 
   vars_prompt:
