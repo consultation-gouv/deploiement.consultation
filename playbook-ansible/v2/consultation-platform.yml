@@ -40,6 +40,14 @@
       private: yes
 
   tasks:
+  # - name: utf8 locale
+  #   action: command sudo update-locale LC_ALL=C.UTF-8
+
+  - name: set default locale
+    lineinfile: dest=/etc/environment
+      regexp="LC_ALL"
+      line="LC_ALL=\"C.UTF-8\""
+
   - name: Create '{{ user }}' users in instance
     user: name={{ user }} shell=/bin/bash createhome=yes comment='main user'
 
