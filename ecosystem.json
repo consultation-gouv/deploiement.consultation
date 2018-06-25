@@ -6,7 +6,6 @@
     },
     {
         "name": "node-apiserver",
-        "script": "npm start",
         "cwd": "./node_api_server",
         "watch": true
     }]
