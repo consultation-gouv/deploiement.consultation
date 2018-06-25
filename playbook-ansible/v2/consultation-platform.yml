@@ -230,7 +230,6 @@
     with_items:
       - gem install bundle
       - bundle install
-      - bundle update
       - bundle exec jekyll build
 
   - name: Change owner of consultation-website
