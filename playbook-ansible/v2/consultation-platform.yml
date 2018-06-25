@@ -2,6 +2,9 @@
 - hosts: pprod
   remote_user: root
 
+  vars:
+    mongodump_archive: "consultation-tools.mongodump.gz"
+
   vars_prompt:
     - name: "user"
       prompt: "Choose the app's username in the server"
@@ -205,10 +208,10 @@
       - /home/{{ user }}/consultation-app/node_modules
 
   - name: copy reference database dump to instance
-    copy: src=~/consultation-app_ansible-playbook-v2/mongodump-pprod dest=/home/{{ user }}/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
+    copy: src=file/{{ mongodump_archive }} dest=/home/{{ user }}/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
 
   - name: fill in database from the dump
-    command: "/usr/bin/mongorestore mongodump-pprod/ chdir=/home/{{ user }}/"
+    command: "/usr/bin/mongorestore --gzip --archive={{ mongodump_archive }} chdir=/home/{{ user }}/"
 
   - name: Install required node packages and launch platform
     command: "{{ item }} chdir=/home/{{ user }}/consultation-app"
