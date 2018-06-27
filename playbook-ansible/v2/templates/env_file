@@ -1,6 +1,6 @@
 SENDGRIDUSER=sendgriduser
 SENDGRIDPASS=sendgridpass
-x-api-key=<apikeyetalab>
+x-api-key=xapikey
 URLPLATFORM=https://domain
 DOMAIN=domain
 APPPATH=/home/user/consultation-app

@@ -42,6 +42,10 @@
       prompt: "Enter your sendgrid password"
       private: yes
 
+    - name: "xapikey"
+      prompt: "Enter your x-api-key"
+      private: yes
+
     - name: "monitpass"
       prompt: "Set the password for the monitoring interface access, the username will be the app's user"
       private: yes
@@ -189,22 +193,21 @@
     # FIXME: use proper j2 template
     template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env
 
-  - name: create .env file for api server
-    # FIXME: use proper j2 template
-    template: src=templates/env_file-api dest=/home/{{ user }}/consultation-app/node_api_server/.env
-
   - name: set variable on .env file
     # FIXME: use proper j2 template
     command: "{{ item }}"
     with_items:
       - sed -i 's/sendgriduser/{{ sendgriduser }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/sendgridpass/{{ sendgridpass }}/' /home/{{ user }}/consultation-app/.env
+      - sed -i 's/xapikey/{{ xapikey }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/domain/{{ domainname }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/node_api_server/.env
-      - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/node_api_server/.env
     no_log: true
+
+  - name: create .env file for api server
+    # FIXME: or plain file with proper j2 template
+    file: src=/home/{{ user }}/consultation-app/.env dest=/home/{{ user }}/consultation-app/node_api_server/.env state=link
 
   - name: Change owner of consultation-app
     file: path={{ item }} owner={{ user }} group={{ user }} mode=755 recurse=yes state=directory
