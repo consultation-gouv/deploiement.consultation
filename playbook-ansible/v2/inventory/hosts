@@ -1,0 +1,8 @@
+[local_vm]
+172.16.25.102
+
+[pprod]
+deploiement.pprod.consultation.etalab.gouv.fr
+
+[production]
+deploiement.consultation.etalab.gouv.fr

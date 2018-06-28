@@ -1,8 +1,15 @@
 ---
-- hosts: 192.168.210.234
+- hosts: pprod
   remote_user: root
 
+  vars:
+    mongodump_archive: "consultation-tools.mongodump.gz"
+
   vars_prompt:
+    - name: "env"
+      prompt: "Choose the environment (pprod or production)"
+      private: no
+
     - name: "user"
       prompt: "Choose the app's username in the server"
       private: no
@@ -24,7 +31,7 @@
       private: yes
 
     - name: "domainname"
-      prompt: "Set your domaine name for your server"
+      prompt: "Set your domain name for your server"
       private: no
 
     - name: "sendgriduser"
@@ -35,18 +42,30 @@
       prompt: "Enter your sendgrid password"
       private: yes
 
+    - name: "xapikey"
+      prompt: "Enter your x-api-key"
+      private: yes
+
     - name: "monitpass"
       prompt: "Set the password for the monitoring interface access, the username will be the app's user"
       private: yes
 
   tasks:
+  # - name: utf8 locale
+  #   action: command sudo update-locale LC_ALL=C.UTF-8
+
+  - name: set default locale
+    lineinfile: dest=/etc/environment
+      regexp="LC_ALL"
+      line="LC_ALL=\"C.UTF-8\""
+
   - name: Create '{{ user }}' users in instance
     user: name={{ user }} shell=/bin/bash createhome=yes comment='main user'
 
   - name: Add '{{ user }}' to sudoers
     template: src=templates/sudoers-user.j2 dest=/etc/sudoers validate='visudo -cf %s'
 
-  - name: Add master's public key to '{{ user }}' in instance
+  - name: Add master public key to '{{ user }}' in instance
     authorized_key: user={{ user }} key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
   - name: Add repo in apt sources
@@ -116,25 +135,8 @@
   - name: Clone consultation-app from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/deploiement.consultation.git dest=/home/{{ user }}/consultation-app force=yes
 
-#  - name: Clone consultation-website from repository
-#    git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes version=hosting
-
   - name: Clone consultation-website from repository
-    git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes
-
-  - name: Configure consultation-app to connecting with mongodb
-    template: src=templates/db_connect.j2 dest=/home/{{ user }}/consultation-app/mongo/db_connect.js
-
-  - name: Add images to consultation-app
-    copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
-    no_log: true
-
-  - name: Set connection mongo users credential
-    command: "{{ item }}"
-    with_items:
-      - sed -i 's/user/{{ user }}/' /home/{{ user }}/consultation-app/mongo/db_connect.js
-      - sed -i 's/pass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/mongo/db_connect.js
-    no_log: true
+    git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes refspec={{ env }}
 
 #  - name: Get ssl certificate for website, app and monit interface
 #    command: "{{ item }}"
@@ -149,14 +151,23 @@
   - name: Set app web front
     template: src=templates/nginx-front-ssl_app.conf dest=/etc/nginx/sites-available/deploiement.{{ domainname }}
 
+  - name: Set api web front
+    template: src=templates/nginx-front-ssl_api.conf dest=/etc/nginx/sites-available/api.{{ domainname }}
+
   - name: Set monitoring web front
     template: src=templates/nginx-front-ssl_monit.conf dest=/etc/nginx/sites-available/monitoring.{{ domainname }}
 
   - name: enable app site
     file: src=/etc/nginx/sites-available/deploiement.{{ domainname }} dest=/etc/nginx/sites-enabled/deploiement.{{ domainname }} state=link
 
-  - name: enable monitoring site
-    file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
+  - name: enable api site
+    file: src=/etc/nginx/sites-available/api.{{ domainname }} dest=/etc/nginx/sites-enabled/api.{{ domainname }} state=link
+
+  - name: enable main site
+    file: src=/etc/nginx/sites-available/default dest=/etc/nginx/sites-enabled/default state=link
+
+  # - name: enable monitoring site
+  #   file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
 
   - name: Set variable on nginx file
     command: "{{ item }}"
@@ -164,31 +175,28 @@
       - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/default
       - sed -i 's/$user/{{ user }}/' /etc/nginx/sites-available/default
       - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/deploiement.{{ domainname }}
+      - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/api.{{ domainname }}
       - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/monitoring.{{ domainname }}
 
   - name: create .env file
+    # FIXME: use proper j2 template
     template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env
 
-  - name: create .env file for api server
-    template: src=templates/env_file-api dest=/home/{{ user }}/consultation-app/node_api_server/.env
-
   - name: set variable on .env file
+    # FIXME: use proper j2 template
     command: "{{ item }}"
     with_items:
       - sed -i 's/sendgriduser/{{ sendgriduser }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/sendgridpass/{{ sendgridpass }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/domain/{{ domainname }}/' /home/{{ user }}/consultation-app/.env
+      - sed -i 's/xapikey/{{ xapikey }}/' /home/{{ user }}/consultation-app/.env
+      - sed -i 's/domain/deploiement.{{ domainname }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/node_api_server/.env
-      - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/node_api_server/.env
     no_log: true
 
-  # - name: correct packages.json
-  #   command: "{{ item }}"
-  #   with_items:
-  #     - sed -i 's/consultation-verification/nodemailer/' /home/{{ user }}/consultation-app/package.json
-  #     - sed -i 's/"^0.5.0"/"3.1.4"/' /home/{{ user }}/consultation-app/package.json
+  - name: create .env file for api server
+    # FIXME: or plain file with proper j2 template
+    file: src=/home/{{ user }}/consultation-app/.env dest=/home/{{ user }}/consultation-app/node_api_server/.env state=link
 
   - name: Change owner of consultation-app
     file: path={{ item }} owner={{ user }} group={{ user }} mode=755 recurse=yes state=directory
@@ -197,10 +205,10 @@
       - /home/{{ user }}/consultation-app/node_modules
 
   - name: copy reference database dump to instance
-    copy: src=~/consultation-app_ansible-playbook-v2/mongodump-pprod dest=/home/{{ user }}/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
+    copy: src=file/{{ mongodump_archive }} dest=/home/{{ user }}/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
 
   - name: fill in database from the dump
-    command: "/usr/bin/mongorestore mongodump-pprod/ chdir=/home/{{ user }}/"
+    command: "/usr/bin/mongorestore --gzip --archive={{ mongodump_archive }} chdir=/home/{{ user }}/"
 
   - name: Install required node packages and launch platform
     command: "{{ item }} chdir=/home/{{ user }}/consultation-app"
@@ -221,7 +229,6 @@
     with_items:
       - gem install bundle
       - bundle install
-      - bundle update
       - bundle exec jekyll build
 
   - name: Change owner of consultation-website
@@ -235,13 +242,12 @@
   - name: Set configuration for monitoring
     template: src=templates/monitconf dest=/etc/monit/monitrc
 
-  - name: Set monit crendential in monitoring conf
+  - name: Set monit credentials in monitoring conf
     command: "{{ item }}"
     with_items:
       - sed -i 's/host/{{ domainname }}/' /etc/monit/monitrc
       - sed -i 's/mdp/{{ monitpass }}/' /etc/monit/monitrc
       - sed -i 's/adminmail/{{ adminemail }}/' /etc/monit/monitrc
-      - sed -i 's/huser/{{ user }}/' /etc/monit/monitrc
       - sed -i 's/domain/{{ domainname }}/' /etc/monit/monitrc
       - sed -i 's/sendgriduser/{{ sendgriduser }}/' /etc/monit/monitrc
       - sed -i 's/sendgridpass/{{ sendgridpass }}/' /etc/monit/monitrc
@@ -254,7 +260,7 @@
     service: name=nginx state=restarted
 
   - name: disable ssh root access
-    command: sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+    command: sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/' /etc/ssh/sshd_config
 
   - name: restart
     service: name=ssh state=restarted
