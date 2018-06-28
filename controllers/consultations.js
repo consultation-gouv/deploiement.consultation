@@ -80,11 +80,9 @@ router.post('/insert', function(req, res, next) {
 				});
                             } else {
                                   res.json({
-                                      success: true,
                                       msg: 'Un email vient de vous être envoyé pour confirmer votre demande.',
                                       class: 'alert-success',
-                                      title: 'Bravo ! ',
-                                      info: info
+                                      title: 'Bravo ! '
 				  });
 			    }
                         });
