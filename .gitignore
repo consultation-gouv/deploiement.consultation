@@ -54,3 +54,4 @@ jspm_packages
 #ansible-playbook
 #playbook-ansible
 
+*.retry
