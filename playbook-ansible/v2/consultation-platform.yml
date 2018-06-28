@@ -31,7 +31,7 @@
       private: yes
 
     - name: "domainname"
-      prompt: "Set your domaine name for your server"
+      prompt: "Set your domain name for your server"
       private: no
 
     - name: "sendgriduser"
@@ -163,6 +163,9 @@
   - name: enable api site
     file: src=/etc/nginx/sites-available/api.{{ domainname }} dest=/etc/nginx/sites-enabled/api.{{ domainname }} state=link
 
+  - name: enable main site
+    file: src=/etc/nginx/sites-available/default dest=/etc/nginx/sites-enabled/default state=link
+
   # - name: enable monitoring site
   #   file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
 
@@ -186,7 +189,7 @@
       - sed -i 's/sendgriduser/{{ sendgriduser }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/sendgridpass/{{ sendgridpass }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/xapikey/{{ xapikey }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/domain/{{ domainname }}/' /home/{{ user }}/consultation-app/.env
+      - sed -i 's/domain/deploiement.{{ domainname }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/.env
     no_log: true
