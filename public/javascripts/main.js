@@ -26,15 +26,15 @@ $(document).ready(function () {
                         },
                         {
                             type   : 'length[5]',
-                            prompt : 'Le slug doit faire au minimum 5 caractères.'
+                            prompt : 'L\'URL doit faire au minimum 5 caractères.'
                         },
                         {
                             type   : 'maxLength[30]',
-                            prompt : 'Le slug doit faire au maximum 30 caractères.'
+                            prompt : 'L\'URL doit faire au maximum 30 caractères.'
                         },
                         {
                             type   : 'regExp[/^[a-z0-9\-]+$/]',
-                            prompt : 'Le slug ne doit pas contenir de caractères spéciaux.'
+                            prompt : 'L\'URL ne doit pas contenir de caractères spéciaux.'
                         }
                     ]
                 },
@@ -47,7 +47,7 @@ $(document).ready(function () {
                         },
                         {
                             type   : 'maxLength[30]',
-                            prompt : 'Le nom de votre consulation doit faire au maximum 30 caractères.'
+                            prompt : 'Le nom de votre consultation doit faire au maximum 30 caractères.'
                         }
                     ]
                 },
@@ -82,11 +82,11 @@ $(document).ready(function () {
                     rules: [
                         {
                             type: 'empty',
-                            prompt: 'Vous devez entrer votre prénom et nom.'
+                            prompt: 'Vous devez entrer vos prénom et nom.'
                         },
                         {
                             type   : 'maxLength[60]',
-                            prompt : 'Votre prénom et nom ne doivent pas excéder 60 caractères.'
+                            prompt : 'Vos prénom et nom ne doivent pas excéder 60 caractères.'
                         }
                     ]
                 },
