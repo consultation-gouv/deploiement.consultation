@@ -1,5 +1,6 @@
 SENDGRIDUSER=sendgriduser
 SENDGRIDPASS=sendgridpass
+SENDGRIDAPIKEY=sendgridapikey
 x-api-key=xapikey
 URLPLATFORM=https://domain
 DOMAIN=domain
