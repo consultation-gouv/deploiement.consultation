@@ -166,8 +166,8 @@
   - name: enable main site
     file: src=/etc/nginx/sites-available/default dest=/etc/nginx/sites-enabled/default state=link
 
-  # - name: enable monitoring site
-  #   file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
+  - name: enable monitoring site
+    file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
 
   - name: Set variable on nginx file
     command: "{{ item }}"
@@ -255,6 +255,7 @@
 
   - name: restart monit service
     service: name=monit state=restarted
+    when: env == "prod"
 
   - name: restart nginx service
     service: name=nginx state=restarted
