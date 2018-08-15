@@ -172,6 +172,7 @@
 
   - name: enable monitoring site
     file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
+    when: env == "prod"
 
   - name: Set variable on nginx file
     command: "{{ item }}"
