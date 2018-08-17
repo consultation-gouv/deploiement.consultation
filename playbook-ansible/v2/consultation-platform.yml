@@ -42,6 +42,10 @@
       prompt: "Enter your sendgrid password"
       private: yes
 
+    - name: "sendgridapikey"
+      prompt: "Enter your sendgrid API key"
+      private: yes
+
     - name: "xapikey"
       prompt: "Enter your x-api-key"
       private: yes
@@ -166,8 +170,9 @@
   - name: enable main site
     file: src=/etc/nginx/sites-available/default dest=/etc/nginx/sites-enabled/default state=link
 
-  # - name: enable monitoring site
-  #   file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
+  - name: enable monitoring site
+    file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
+    when: env == "prod"
 
   - name: Set variable on nginx file
     command: "{{ item }}"
@@ -188,6 +193,7 @@
     with_items:
       - sed -i 's/sendgriduser/{{ sendgriduser }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/sendgridpass/{{ sendgridpass }}/' /home/{{ user }}/consultation-app/.env
+      - sed -i 's/sendgridapikey/{{ sendgridapikey }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/xapikey/{{ xapikey }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/domain/deploiement.{{ domainname }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/.env
@@ -220,7 +226,6 @@
       - sudo -u {{ user }} bash -lc "pm2 stop 0"
       - sudo -u {{ user }} bash -lc "pm2 start 0"
 
-
   - name: Install Ruby with RVM
     script: file/install-rvm.sh
 
@@ -235,6 +240,16 @@
     file: path={{ item }} owner={{ user }} group={{ user }} mode=755 recurse=yes
     with_items:
       - /home/{{ user }}/consultation-website
+
+  - name: create email-report.sh
+    template: src=templates/email-report.sh dest=/home/{{ user }}/consultation-app/email-report.sh mode=755
+
+  - name: install email-report cron
+    when: env == "prod"
+    cron:
+      name: "Daily email report"
+      special_time: daily
+      job: /home/{{ user }}/consultation-app/email-report.sh
 
   - name: copy default configuration of monitoring server
     command: cp /etc/monit/monitrc /etc/monit/monitrc.default
@@ -255,11 +270,12 @@
 
   - name: restart monit service
     service: name=monit state=restarted
+    when: env == "prod"
 
   - name: restart nginx service
     service: name=nginx state=restarted
 
-  - name: disable ssh root access
+  - name: disable ssh root access without password
     command: sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/' /etc/ssh/sshd_config
 
   - name: restart

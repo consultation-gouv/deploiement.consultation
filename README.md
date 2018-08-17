@@ -50,8 +50,9 @@ cp env.template .env
 Puis éditer les informations :
 
 ```
-SENDGRIDUSER=apikey
-SENDGRIDPASS=<votre apiKey>
+SENDGRIDUSER=sendgridusername
+SENDGRIDPASS=sendgridpassword
+SENDGRIDAPIKEY=sendgridapikey
 URLPLATFORM=l'url de votre plateforme (http://consultation.local par exemple)
 DOMAIN=votre domain, consultation.local par exemple
 MONGOUSER= 
