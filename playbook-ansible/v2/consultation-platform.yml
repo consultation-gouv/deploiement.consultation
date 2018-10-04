@@ -149,6 +149,10 @@
 #      - letsencrypt certonly --standalone --domain deploiement.{{ domainname }} --email {{ adminemail }} --agree-tos -n
 #      - letsencrypt certonly --standalone --domain monitoring.{{ domainname }} --email {{ adminemail }} --agree-tos -n
 
+  # - name: Add images to consultation-app
+  #   copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
+  #   no_log: true
+
   - name: Set website web front
     template: src=templates/nginx-front-ssl_website.conf dest=/etc/nginx/sites-available/default
 
