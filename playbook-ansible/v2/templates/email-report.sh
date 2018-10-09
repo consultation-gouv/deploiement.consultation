@@ -21,6 +21,6 @@ if [ -n "$content" ] ; then
      --url https://api.sendgrid.com/v3/mail/send \
      --header "authorization: Bearer {{ sendgridapikey }}" \
      --header 'Content-Type: application/json' \
-     --data '{"personalizations": [{"to": [{"email": "consultation@etalab.gouv.fr"}], "from": {"email": "consultation@etalab.gouv.fr"},"subject":"'"${subject}"'", "content": [{"type": "text/plain", "value": "'"${content}"'"}]}'
+     --data '{"personalizations": [{"to": [{"email": "consultation@etalab.gouv.fr"}]}], "from": {"email": "consultation@etalab.gouv.fr"},"subject":"'"${subject}"'", "content": [{"type": "text/plain", "value": "'"${content}"'"}]}'
 fi
 
