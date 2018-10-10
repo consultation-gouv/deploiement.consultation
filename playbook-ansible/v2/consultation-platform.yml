@@ -42,6 +42,10 @@
       prompt: "Enter your sendgrid password"
       private: yes
 
+    - name: "sendgridapikey"
+      prompt: "Enter your sendgrid API key"
+      private: yes
+
     - name: "xapikey"
       prompt: "Enter your x-api-key"
       private: yes
@@ -166,8 +170,9 @@
   - name: enable main site
     file: src=/etc/nginx/sites-available/default dest=/etc/nginx/sites-enabled/default state=link
 
-  # - name: enable monitoring site
-  #   file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
+  - name: enable monitoring site
+    file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
+    when: env == "prod"
 
   - name: Set variable on nginx file
     command: "{{ item }}"
@@ -188,6 +193,7 @@
     with_items:
       - sed -i 's/sendgriduser/{{ sendgriduser }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/sendgridpass/{{ sendgridpass }}/' /home/{{ user }}/consultation-app/.env
+      - sed -i 's/sendgridapikey/{{ sendgridapikey }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/xapikey/{{ xapikey }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/domain/deploiement.{{ domainname }}/' /home/{{ user }}/consultation-app/.env
       - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/.env
@@ -264,6 +270,7 @@
 
   - name: restart monit service
     service: name=monit state=restarted
+    when: env == "prod"
 
   - name: restart nginx service
     service: name=nginx state=restarted

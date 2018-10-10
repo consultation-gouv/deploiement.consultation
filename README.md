@@ -50,8 +50,9 @@ cp env.template .env
 Puis éditer les informations :
 
 ```
-SENDGRIDUSER=apikey
-SENDGRIDPASS=<votre apiKey>
+SENDGRIDUSER=sendgridusername
+SENDGRIDPASS=sendgridpassword
+SENDGRIDAPIKEY=sendgridapikey
 URLPLATFORM=l'url de votre plateforme (http://consultation.local par exemple)
 DOMAIN=votre domain, consultation.local par exemple
 MONGOUSER= 
@@ -61,7 +62,19 @@ MONGOHOST=mongo
 
 ### Commandes
 
-- docker-compose up. Il suffit de se rendre sur l'URL indiquée à l'exécution de la commande.
+Il faut tout d'abord lancer les services :
+
+```
+docker-compose up
+```
+
+Ensuite, au 1er lancement, ajouter les outils de consultation par défaut :
+
+```
+/usr/bin/mongorestore --gzip --archive=./playbook-ansible/v2/file/consultation-tools.mongodump.gz
+```
+
+Le site est ensuite disponible, par défaut sur localhost:80
 
 ### Base de données
 
