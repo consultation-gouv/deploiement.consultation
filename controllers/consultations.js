@@ -177,13 +177,24 @@ router.get('/confirmation/:URL', function(req, res) {
                                         title: 'confirmation',
                                         msg: 'Bravo votre demande est confirmée. Le déploiement de votre consultation est en cours. Vous recevrez un email dans quelques minutes avec les instructions pour commencer.'
                                     };
-                                } else {
-                                    //il y a une erreur
-                                    obj = {
-                                        success: false,
-                                        title: 'ERREUR : quelque chose s\'est mal passé.',
-                                        msg: response.body ? response.body.message : "No body"
-                                    };
+                                } else { //il y a une erreur
+				    if (consult.toolname == "cap-collectif" || consult.toolname == "assembl") {
+				        // ces backends ne fonctionnent pas pour l'instant,
+				        // https://github.com/consultation-gouv/deploiement.consultation/issues/19
+				        // https://github.com/consultation-gouv/deploiement.consultation/issues/20
+					obj = {
+					    success: false,
+					    title: "Erreur : ce service est temporairement inaccessible chez l'hébergeur.",
+					    msg: ""
+					};
+                                      res.render('confirmation-problem-backend', obj);
+				    } else {
+					obj = {
+					    success: false,
+					    title: 'ERREUR : quelque chose s\'est mal passé.',
+					    msg: response.body ? response.body.message : "No body"
+					};
+				    }
                                 }
                                 //rendu html avec message correspondant (confirmation ou erreur)
                                 res.render('confirmation', obj);
