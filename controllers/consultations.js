@@ -179,11 +179,19 @@ router.get('/confirmation/:URL', function(req, res) {
                                     };
                                 } else {
                                     //il y a une erreur
-                                    obj = {
-                                        success: false,
-                                        title: 'ERREUR : quelque chose s\'est mal passé.',
-                                        msg: response.body ? response.body.message : "No body"
-                                    };
+				    if (consult.toolname == "foo" || consult.toolname == "cap-collectif" || consult.toolname == "assembl") {
+					obj = {
+					    success: false,
+					    title: "ERREUR : un problème a été rencontré chez l'hébergeur de cette consultation, merci d'envoyer un email à consultation@etalab.gouv.fr",
+					    msg: ''
+					};
+				    } else {
+					obj = {
+					    success: false,
+					    title: 'ERREUR : quelque chose s\'est mal passé.',
+					    msg: response.body ? response.body.message : "No body"
+					};
+				    }
                                 }
                                 //rendu html avec message correspondant (confirmation ou erreur)
                                 res.render('confirmation', obj);
