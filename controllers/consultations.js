@@ -177,14 +177,17 @@ router.get('/confirmation/:URL', function(req, res) {
                                         title: 'confirmation',
                                         msg: 'Bravo votre demande est confirmée. Le déploiement de votre consultation est en cours. Vous recevrez un email dans quelques minutes avec les instructions pour commencer.'
                                     };
-                                } else {
-                                    //il y a une erreur
-				    if (consult.toolname == "foo" || consult.toolname == "cap-collectif" || consult.toolname == "assembl") {
+                                } else { //il y a une erreur
+				    if (consult.toolname == "cap-collectif" || consult.toolname == "assembl") {
+				        // ces backends ne fonctionnent pas pour l'instant,
+				        // https://github.com/consultation-gouv/deploiement.consultation/issues/19
+				        // https://github.com/consultation-gouv/deploiement.consultation/issues/20
 					obj = {
 					    success: false,
-					    title: "ERREUR : un problème a été rencontré chez l'hébergeur de cette consultation, merci d'envoyer un email à consultation@etalab.gouv.fr",
-					    msg: ''
+					    title: "Erreur : ce service est temporairement inaccessible chez l'hébergeur.",
+					    msg: ""
 					};
+                                      res.render('confirmation-problem-backend', obj);
 				    } else {
 					obj = {
 					    success: false,
