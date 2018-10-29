@@ -187,7 +187,7 @@ router.get('/confirmation/:URL', function(req, res) {
 					    title: "Erreur : ce service est temporairement inaccessible chez l'hébergeur.",
 					    msg: ""
 					};
-                                      res.render('confirmation-problem-backend', obj);
+                                      return res.render('confirmation-problem-backend', obj);
 				    } else {
 					obj = {
 					    success: false,
