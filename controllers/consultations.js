@@ -161,7 +161,7 @@ router.get('/confirmation/:URL', function(req, res) {
                                 //declare variable obj that will contain messages returned
                                 let obj;
                                 const httpstatus = response.statusType;//1,2,3,4 ou 5
-                                if (httpstatus === 2) {//synchrone and asynchrone cases
+                                if (consult.toolname != "cap-collectif" && httpstatus === 2) {//synchrone and asynchrone cases
                                     //update mongo collection consultation with data returnes (url and status)
                                     consultation.findConsultation(args.data.requestIdentifier, function(err, consult) {
                                         //if (err) return response.status(500).send({error: err});
