@@ -161,7 +161,7 @@ router.get('/confirmation/:URL', function(req, res) {
                                 //declare variable obj that will contain messages returned
                                 let obj;
                                 const httpstatus = response.statusType;//1,2,3,4 ou 5
-                                if (httpstatus === 2) {//synchrone and asynchrone cases
+                                if (consult.toolname != "cap-collectif" && httpstatus === 2) {//synchrone and asynchrone cases
                                     //update mongo collection consultation with data returnes (url and status)
                                     consultation.findConsultation(args.data.requestIdentifier, function(err, consult) {
                                         //if (err) return response.status(500).send({error: err});
@@ -177,13 +177,24 @@ router.get('/confirmation/:URL', function(req, res) {
                                         title: 'confirmation',
                                         msg: 'Bravo votre demande est confirmée. Le déploiement de votre consultation est en cours. Vous recevrez un email dans quelques minutes avec les instructions pour commencer.'
                                     };
-                                } else {
-                                    //il y a une erreur
-                                    obj = {
-                                        success: false,
-                                        title: 'ERREUR : quelque chose s\'est mal passé.',
-                                        msg: response.body ? response.body.message : "No body"
-                                    };
+                                } else { //il y a une erreur
+				    if (consult.toolname == "cap-collectif" || consult.toolname == "assembl") {
+				        // ces backends ne fonctionnent pas pour l'instant,
+				        // https://github.com/consultation-gouv/deploiement.consultation/issues/19
+				        // https://github.com/consultation-gouv/deploiement.consultation/issues/20
+					obj = {
+					    success: false,
+					    title: "Erreur : ce service est temporairement inaccessible chez l'hébergeur.",
+					    msg: ""
+					};
+                                      return res.render('confirmation-problem-backend', obj);
+				    } else {
+					obj = {
+					    success: false,
+					    title: 'ERREUR : quelque chose s\'est mal passé.',
+					    msg: response.body ? response.body.message : "No body"
+					};
+				    }
                                 }
                                 //rendu html avec message correspondant (confirmation ou erreur)
                                 res.render('confirmation', obj);

@@ -230,7 +230,6 @@
       - sudo -u {{ user }} bash -lc "pm2 stop 0"
       - sudo -u {{ user }} bash -lc "pm2 start 0"
 
-
   - name: Install Ruby with RVM
     script: file/install-rvm.sh
 
@@ -245,6 +244,16 @@
     file: path={{ item }} owner={{ user }} group={{ user }} mode=755 recurse=yes
     with_items:
       - /home/{{ user }}/consultation-website
+
+  - name: create email-report.sh
+    template: src=templates/email-report.sh dest=/home/{{ user }}/consultation-app/email-report.sh mode=755
+
+  - name: install email-report cron
+    when: env == "prod"
+    cron:
+      name: "Daily email report"
+      special_time: daily
+      job: /home/{{ user }}/consultation-app/email-report.sh
 
   - name: copy default configuration of monitoring server
     command: cp /etc/monit/monitrc /etc/monit/monitrc.default
@@ -270,7 +279,7 @@
   - name: restart nginx service
     service: name=nginx state=restarted
 
-  - name: disable ssh root access
+  - name: disable ssh root access without password
     command: sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/' /etc/ssh/sshd_config
 
   - name: restart
