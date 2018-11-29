@@ -52,9 +52,22 @@ html body header nav.menu a.home img {
 html body header nav.menu ul {
   text-align: right;
 }
-html body header nav.menu ul li {
-  display: inline;
+/* html body header nav.menu ul li { */
+/*   display: inline; */
+/* } */
+
+.right-menu {
+  font-size: 18px !important;
+  color: #28A7D0;
 }
+
+.right-side {
+  font-size: 16px !important;
+  font-weight: bold;
+  font-style: italic;
+  color: #5D78AA !important;
+}
+
 html body p {
   font-weight: 300;
   line-height: 1.5em;
