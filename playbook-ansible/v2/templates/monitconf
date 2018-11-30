@@ -8,19 +8,19 @@ set statefile /var/lib/monit/state
 
 # Configuration of smtp server for mail alert
 set mailserver smtp.sendgrid.com port 587
-username sendgriduser password sendgridpass
+username {{ sendgriduser }} password {{ sendgridpass }}
 # using TLSV1
 
 # Set custom mail format for alert
 set mail-format {
-from: monit@monitoring.domain
-reply-to: support@domain
+from: monit@{{ domainname }}
+reply-to: support.consultation@etalab.gouv.fr
 subject: Alerte : $EVENT - $DATE
 message: Monit $ACTION $SERVICE le $DATE sur le serveur $HOST: $DESCRIPTION.
 }
 
 # Set admin mail
-set alert adminmail
+set alert {{ adminemail }}
 
 # Set dir where stock alert envents
 set eventqueue
@@ -28,52 +28,60 @@ basedir /var/lib/monit/events
 
 # Set Web interface and access
 set httpd port 39342
-allow huser:mdp
+use address 127.0.0.1
+allow ogptoolbox:Monitetalab75
 
 # Set check system and service
-check system host
-if memory usage > 85% then alert
-if cpu usage (user) > 75% then alert
-if swap usage > 25% then alert
+check system {{ domainname }}
+if memory usage > 100% then alert
+if cpu usage (user) > 100% then alert
+if swap usage > 100% then alert
+
+check device sda1 with path /dev/sda1
+if SPACE usage > 80% then alert
 
 #NGINX SERVER
 check process nginx with pidfile /var/run/nginx.pid
-start program = "/etc/init.d/nginx start"
-stop program = "/etc/init.d/nginx stop"
-restart program = "/etc/init.d/nginx restart"
+start program = "/bin/systemctl start nginx"
+stop program = "/bin/systemctl stop nginx"
+restart program = "/bin/systemctl restart nginx"
 if failed port 80 protocol http then restart
-
 
 #SSH SERVER
 check process sshd with pidfile /var/run/sshd.pid
-start program = "/etc/init.d/ssh start"
-stop program = "/etc/init.d/ssh stop"
-restart program = "/etc/init.d/ssh restart"
+start program = "/bin/systemctl start ssh"
+stop program = "/bin/systemctl stop ssh"
+restart program = "/bin/systemctl restart restart"
 if failed port 22 protocol ssh then restart
 
 #MONGODB
-check process mongod with pidfile /var/run/mongod.pid
-start program = "/bin/bash -lc '/bin/systemctl start mongod.service'"
-stop program = "/bin/bash -lc '/bin/systemctl stop mongod.service'"
-restart program = "/bin/bash -lc '/bin/systemctl restart mongod.service'"
+check process mongod matching "/usr/bin/mongod"
+start program = "/bin/systemctl start mongod"
+stop program = "/bin/systemctl stop mongod"
+restart program = "/bin/systemctl restart mongod"
 if failed port 27017 then restart
 
-#NODE PLATFORM
-check process node-platform with pidfile /home/huser/.pm2/pids/node-platform-0.pid
-start program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 start 0'"
-stop program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 stop 0'"
-restart program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 restart 0'"
-if failed port 3000 then restart
+#pm2 
+check process pm2 with pidfile /home/{{ user }}/.pm2/pm2.pid
+start program = "/usr/bin/sudo -u {{ user }} /bin/bash -lc 'cd /home/{{ user }}/deploiement.consultation ; /usr/bin/pm2 start ecosystem.json'"
+stop program = "/usr/bin/sudo -u {{ user }} /bin/bash -lc '/usr/bin/pm2 kill'"
 
-#NODE API SERVER
-check process node-api-server with pidfile /home/huser/.pm2/pids/node-apiserver-1.pid
-start program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 start 1'"
-stop program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 stop 1'"
-restart program = "/usr/bin/sudo -u huser /bin/bash -lc '/usr/bin/pm2 restart 1'"
-if failed port 8080 then restart
+# #NODE PLATFORM
+# check process node-platform with pidfile /home/ogptoolbox/.pm2/pids/node-platform-1.pid
+# start program = "/usr/bin/sudo -u ogptoolbox /bin/bash -lc '/usr/bin/pm2 start 1'"
+# stop program = "/usr/bin/sudo -u ogptoolbox /bin/bash -lc '/usr/bin/pm2 stop 1'"
+# restart program = "/usr/bin/sudo -u ogptoolbox /bin/bash -lc '/usr/bin/pm2 restart 1'"
+# if failed port 3000 then restart
+
+# #NODE API SERVER
+# check process node-api-server with pidfile /home/ogptoolbox/.pm2/pids/node-apiserver-2.pid
+# start program = "/usr/bin/sudo -u ogptoolbox /bin/bash -lc '/usr/bin/pm2 start 2'"
+# stop program = "/usr/bin/sudo -u ogptoolbox /bin/bash -lc '/usr/bin/pm2 stop 2'"
+# restart program = "/usr/bin/sudo -u ogptoolbox /bin/bash -lc '/usr/bin/pm2 restart 2'"
+# if failed port 8080 then restart
 
 #FAIL2BAN
 check process fail2ban with pidfile /var/run/fail2ban/fail2ban.pid
-start program = "/etc/init.d/fail2ban start"
-stop program = "/etc/init.d/fail2ban stop"
-restart program = "/etc/init.d/restart restart"
+start program = "/bin/systemctl start fail2ban"
+stop program = "/bin/systemctl stop fail2ban "
+restart program = "/bin/systemctl restart fail2ban"
