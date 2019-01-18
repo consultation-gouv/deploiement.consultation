@@ -6,7 +6,6 @@ npm-debug.log*
 .env
 .idea
 # images
-images
 dump
 docker/data
 

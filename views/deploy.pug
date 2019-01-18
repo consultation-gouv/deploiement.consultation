@@ -4,31 +4,47 @@ block content
     div(class="ui container")
       form(id="form-deploy",class="ui form" action="#", method="post")
           h4(class="ui dividing header") Remplir les champs suivants pour lancer votre consultation sur #{tool.platformName || tool.name}
-          div(class="two fields")
-                    if tool.urlPlatform
-                        div(class="inline twelve wide field")
-                            label(for="slug") #[span.strong URL souhaitée] :
-                            span #{tool.urlPlatform}/
-                            input(id="slug",type="text",name="slug", value="", class="required")
-          div(class="six wide field required")
-            label(for="adminEmail") Email
-            input(id="adminEmail",type="text",name="adminEmail",value="")
-          div(class="six wide field required")
-              label(for="name") Nom de la consultation
-              input(id="name",type="text",name="name",value="")
-          div(class="six wide field required")
-              label(for="adminName") Prénom et nom
-              input(id="adminName",type="text",name="adminName",value="")
-          div(class="six wide field required")
-              label(for="adminOrganizationName") Organisation
-              input(id="adminOrganizationName",type="text",name="adminOrganizationName",value="")
-          input(id="toolName",type="hidden",name="toolName",value=tool.name)
-          input(id="hosting",type="hidden",name="hosting",value=tool.hosting)
-          input(id="register",type="hidden",name="type",value="register")
-          div(class="field required")
-              div(class="ui checkbox")
-                  input(id="cgu",class="hidden", tabindex="0", type="checkbox",name="checkbox")
-                  label(for="cgu") Je suis d'accord avec les #[a(href="https://consultation.etalab.gouv.fr/cgu.html",target="_blank") CGU du site].
-          div(class="ui blue submit button") Lancez votre consultation !
-          div(class="ui error message")
-          div(class="ui success message")
+          div(class='ui grid')
+            div(class='two column row middle aligned')
+              div(class='left floated column')
+                div(class="four fields")
+                  if tool.urlPlatform
+                    div(class="inline fourteen wide field")
+                      label(for="slug") #[span.strong URL souhaitée] :
+                      span #{tool.urlPlatform}/
+                      input(id="slug",type="text",name="slug", value="", class="required")
+                div(class="twelve wide field required")
+                  label(for="adminEmail") Email
+                  input(id="adminEmail",type="text",name="adminEmail",value="")
+                div(class="twelve wide field required")
+                  label(for="name") Nom de la consultation
+                  input(id="name",type="text",name="name",value="")
+                div(class="twelve wide field required")
+                  label(for="adminName") Prénom et nom
+                  input(id="adminName",type="text",name="adminName",value="")
+                div(class="twelve wide field required")
+                  label(for="adminOrganizationName") Organisation
+                  input(id="adminOrganizationName",type="text",name="adminOrganizationName",value="")
+                input(id="toolName",type="hidden",name="toolName",value=tool.name)
+                input(id="hosting",type="hidden",name="hosting",value=tool.hosting)
+                input(id="register",type="hidden",name="type",value="register")
+                div(class="field required")
+                  div(class="ui checkbox")
+                    input(id="cgu",class="hidden", tabindex="0", type="checkbox",name="checkbox")
+                    label(for="cgu") Je suis d'accord avec les #[a(href="https://consultation.etalab.gouv.fr/cgu.html",target="_blank") CGU du site].
+                div(class="inline")
+                  div(class="ui blue submit button") Lancez votre consultation !
+                  span &nbsp; &nbsp; &nbsp;
+                  a(href='https://consultation.etalab.gouv.fr/support.html' class='right-side') besoin d'aide ?
+                div(class="ui error message")
+                div(class="ui success message")
+              div(class='right floated column')
+                div(class='ui horizontal list right-side')
+                  div(class='item')
+                      a(href='https://consultation.etalab.gouv.fr', title='Accueil', class="ui image") 
+                          img(src='/images/ampoule.svg',alt='',width="64",height="40") 
+                      div(class='content')
+                        div(class='header')
+                        | Pas de panique, vous pourrez re-modifier 
+                        div(class='header')
+                        | ces paramètres ultérieurement
