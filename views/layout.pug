@@ -32,3 +32,15 @@ html(lang='fr')
           
     main
       block content
+
+    script(src='/modules/jquery/dist/jquery.min.js')
+    script(src='/modules/semantic-ui-css/semantic.min.js')
+
+    if includeDeploy === true
+        script(src='/javascripts/piwik.js')
+        script(src='/javascripts/main.js')
+        script(src='/modules/form-serializer/dist/jquery.serialize-object.min.js')
+
+    if includeTool === true
+        script(src='/javascripts/tool.js')
+
