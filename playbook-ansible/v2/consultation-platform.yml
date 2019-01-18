@@ -149,6 +149,10 @@
 #      - letsencrypt certonly --standalone --domain deploiement.{{ domainname }} --email {{ adminemail }} --agree-tos -n
 #      - letsencrypt certonly --standalone --domain monitoring.{{ domainname }} --email {{ adminemail }} --agree-tos -n
 
+  # - name: Add images to consultation-app
+  #   copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
+  #   no_log: true
+
   - name: Set website web front
     template: src=templates/nginx-front-ssl_website.conf dest=/etc/nginx/sites-available/default
 
@@ -174,38 +178,18 @@
     file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
     when: env == "prod"
 
-  - name: Set variable on nginx file
-    command: "{{ item }}"
-    with_items:
-      - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/default
-      - sed -i 's/$user/{{ user }}/' /etc/nginx/sites-available/default
-      - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/deploiement.{{ domainname }}
-      - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/api.{{ domainname }}
-      - sed -i 's/$domain/{{ domainname }}/' /etc/nginx/sites-available/monitoring.{{ domainname }}
+  - name: restart nginx service
+    service: name=nginx state=restarted
 
   - name: create .env file
-    # FIXME: use proper j2 template
     template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env
-
-  - name: set variable on .env file
-    # FIXME: use proper j2 template
-    command: "{{ item }}"
-    with_items:
-      - sed -i 's/sendgriduser/{{ sendgriduser }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/sendgridpass/{{ sendgridpass }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/sendgridapikey/{{ sendgridapikey }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/xapikey/{{ xapikey }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/domain/deploiement.{{ domainname }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/mongouser/{{ user }}/' /home/{{ user }}/consultation-app/.env
-      - sed -i 's/mongouspass/{{ mongogppass }}/' /home/{{ user }}/consultation-app/.env
     no_log: true
 
   - name: create .env file for api server
-    # FIXME: or plain file with proper j2 template
-    file: src=/home/{{ user }}/consultation-app/.env dest=/home/{{ user }}/consultation-app/node_api_server/.env state=link
+    template: src=templates/env_file dest=/home/{{ user }}/consultation-app/node_api_server/.env
 
   - name: Change owner of consultation-app
-    file: path={{ item }} owner={{ user }} group={{ user }} mode=755 recurse=yes state=directory
+    file: path={{ item }} owner={{ user }} group={{ user }} mode=u=rwX,g=rX,o=rX recurse=yes state=directory
     with_items:
       - /home/{{ user }}/consultation-app
       - /home/{{ user }}/consultation-app/node_modules
@@ -251,32 +235,15 @@
       special_time: daily
       job: /home/{{ user }}/consultation-app/email-report.sh
 
-  - name: copy default configuration of monitoring server
-    command: cp /etc/monit/monitrc /etc/monit/monitrc.default
-
   - name: Set configuration for monitoring
     template: src=templates/monitconf dest=/etc/monit/monitrc
-
-  - name: Set monit credentials in monitoring conf
-    command: "{{ item }}"
-    with_items:
-      - sed -i 's/host/{{ domainname }}/' /etc/monit/monitrc
-      - sed -i 's/mdp/{{ monitpass }}/' /etc/monit/monitrc
-      - sed -i 's/adminmail/{{ adminemail }}/' /etc/monit/monitrc
-      - sed -i 's/domain/{{ domainname }}/' /etc/monit/monitrc
-      - sed -i 's/sendgriduser/{{ sendgriduser }}/' /etc/monit/monitrc
-      - sed -i 's/sendgridpass/{{ sendgridpass }}/' /etc/monit/monitrc
     no_log: true
 
   - name: restart monit service
     service: name=monit state=restarted
-    when: env == "prod"
-
-  - name: restart nginx service
-    service: name=nginx state=restarted
 
   - name: disable ssh root access without password
-    command: sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/' /etc/ssh/sshd_config
+    lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin without-password" state=present
 
-  - name: restart
+  - name: restart ssh service
     service: name=ssh state=restarted
