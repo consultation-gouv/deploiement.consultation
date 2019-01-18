@@ -1,5 +1,5 @@
 ---
-- hosts: pprod
+- hosts: production
   remote_user: root
 
   vars:
@@ -109,6 +109,9 @@
   - name: Install pm2
     npm: name=pm2 global=yes
 
+  - name: Install pm2 logrotate
+    command: pm2 install logrotate
+
   - name: Stop monit service
     service: name=monit state=stopped
 
@@ -128,7 +131,6 @@
   - name: Configure mongodb DB {{ user }} user
     mongodb_user: login_user={{ mongosu }} login_password={{ mongosupass }} database=db_deploy name={{ user }} password={{ mongogppass }} state=present roles='readWrite'
     no_log: true
-
 
   - name: Set mongodb PID file
     file: src=/var/lib/mongodb/mongod.lock dest=/var/run/mongod.pid state=link
@@ -176,7 +178,7 @@
 
   - name: enable monitoring site
     file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
-    when: env == "prod"
+    when: env == "production"
 
   - name: restart nginx service
     service: name=nginx state=restarted
@@ -229,7 +231,7 @@
     template: src=templates/email-report.sh dest=/home/{{ user }}/consultation-app/email-report.sh mode=755
 
   - name: install email-report cron
-    when: env == "prod"
+    when: env == "production"
     cron:
       name: "Daily email report"
       special_time: daily
