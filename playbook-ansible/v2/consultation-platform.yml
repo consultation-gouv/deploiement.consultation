@@ -72,6 +72,9 @@
   - name: Add master public key to '{{ user }}' in instance
     authorized_key: user={{ user }} key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
+  - name: Ingore expiration on jessie sources
+    copy: src=file/apt-no-expiration.conf dest=/etc/apt/apt.conf.d/no-expiration.conf
+
   - name: Add repo in apt sources
     template: src=templates/sources_list.j2 dest=/etc/apt/sources.list
 
