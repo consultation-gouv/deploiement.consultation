@@ -1,5 +1,5 @@
 ---
-- hosts: production
+- hosts: all
   remote_user: root
 
   vars:
