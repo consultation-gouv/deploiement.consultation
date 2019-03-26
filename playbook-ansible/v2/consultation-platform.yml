@@ -96,8 +96,11 @@
         - monit
         - ntpdate
 
-  - name: Install certbot
-    apt: name=certbot state=present default_release=jessie-backports
+  - name: Install certbot & python-certbot-nginx
+    apt: name={{ item }} state=present default_release=jessie-backports
+    with_items:
+        - certbot
+        - python-certbot-nginx
 
   - name: update date and hour
     command: ntpdate fr.pool.ntp.org
@@ -147,12 +150,18 @@
   - name: Clone consultation-website from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/consultation.gouv.fr.git dest=/home/{{ user }}/consultation-website force=yes refspec={{ env }}
 
-#  - name: Get ssl certificate for website, app and monit interface
-#    command: "{{ item }}"
-#    with_items:
-#      - letsencrypt certonly --standalone --domain {{ domainname }} --email {{ adminemail }} --agree-tos -n
-#      - letsencrypt certonly --standalone --domain deploiement.{{ domainname }} --email {{ adminemail }} --agree-tos -n
-#      - letsencrypt certonly --standalone --domain monitoring.{{ domainname }} --email {{ adminemail }} --agree-tos -n
+  - name: Get SSL certificates
+    command: "certbot certonly --authenticator webroot --webroot-path /var/www/html --domain {{ item }} --email {{ adminemail }} --agree-tos -n"
+    with_items:
+      - "{{ domainname }}"
+      - "api.{{ domainname }}"
+      - "deploiement.{{ domainname }}"
+
+  - name: Get SSL certificate for production monitoring
+    command: "certbot certonly --authenticator webroot --webroot-path /var/www/html --domain {{ item }} --email {{ adminemail }} --agree-tos -n"
+    with_items:
+      - "monitoring.{{ domainname }}"
+    when: env == "production"
 
   # - name: Add images to consultation-app
   #   copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
