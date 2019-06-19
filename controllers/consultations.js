@@ -200,7 +200,7 @@ router.get('/confirmation/:URL', function(req, res) {
                                 res.render('confirmation', obj);
                             });
 
-                    } else { //  traitement cas particulier democracyosenvoi mail
+                    } else { //  traitement cas particulier envoi mail
                         const mail = t.email;//email associated to tool
 
                         const transporter = nodemailer.createTransport({
