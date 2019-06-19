@@ -235,7 +235,7 @@
       - bundle exec jekyll build
 
   - name: Change owner of consultation-website
-    file: path={{ item }} owner={{ user }} group={{ user }} mode=755 recurse=yes
+    file: path={{ item }} owner={{ user }} group={{ user }} mode=u=rwX,g=rX,o=rX recurse=yes
     with_items:
       - /home/{{ user }}/consultation-website
 
