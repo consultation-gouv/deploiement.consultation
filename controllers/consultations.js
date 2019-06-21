@@ -216,7 +216,7 @@ router.get('/confirmation/:URL', function(req, res) {
                         const mailOptions = {
                             from: '"Etalab <support.consultation@etalab.gouv.fr>', // sender address
                             to: mail+ ',support.consultation@etalab.gouv.fr', // list of receivers
-                            subject: 'Une consultation avec DemocracyOS', // Subject line
+                            subject: 'Demande manuelle de création de consultation', // Subject line
                             text: escape(message), // plain text body
                             html: message // html body
                         };

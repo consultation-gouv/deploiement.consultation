@@ -32,7 +32,7 @@ module.exports = function() {
                         else if (emailValid && !email.match(re) )  {
                             obj.success = false;
                             obj.status = 200;
-                            obj.msg  = 'Votre email n\'est pas autorisé pour déployer une consultation.';
+                            obj.msg  = 'Ce service est réservé aux agents publics de l’État : veuillez utiliser un mail se terminant en ".gouv.fr" (ou affilié), ou contactez l\'aide du site.';
                         } else {
                             obj.status= 200;
                             obj.success = true;
