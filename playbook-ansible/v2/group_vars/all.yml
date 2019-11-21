@@ -1,4 +1,9 @@
 user: consultation
+
 adminemail: sdelafond@gmail.com
+
 mongosu: mongoroot
 
+mongodump_archive: "consultation-tools.mongodump.gz"
+
+ruby_version: 2.3.1
