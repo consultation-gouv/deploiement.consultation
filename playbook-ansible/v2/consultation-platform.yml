@@ -78,8 +78,9 @@
     apt: update_cache=yes
 
   - name: Install required packages
-    apt: name={{ item }} state=present
-    with_items:
+    apt:
+      state: present
+      name:
         - git
         - curl
         - mongodb-org
@@ -90,8 +91,10 @@
         - ntpdate
 
   - name: Install certbot & python-certbot-nginx
-    apt: name={{ item }} state=present default_release=jessie-backports
-    with_items:
+    apt:
+      state: present
+      default_release: jessie-backports
+      name:
         - certbot
         - python-certbot-nginx
 
