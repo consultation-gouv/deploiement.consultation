@@ -2,26 +2,7 @@
 - hosts: all
   remote_user: root
 
-  vars:
-    mongodump_archive: "consultation-tools.mongodump.gz"
-
   vars_prompt:
-    - name: "env"
-      prompt: "Choose the environment (pprod or production)"
-      private: no
-
-    - name: "user"
-      prompt: "Choose the app's username in the server"
-      private: no
-
-    - name: "adminemail"
-      prompt: "Set your contact email for certificate and monitoring alert"
-      private: no
-
-    - name: "mongosu"
-      prompt: "Set your mongodb superAdmin username"
-      private: no
-
     - name: "mongosupass"
       prompt: "Set your mongodb superAdmin password"
       private: yes
@@ -29,10 +10,6 @@
     - name: "mongogppass"
       prompt: "Set the mongodb password for the app's user "
       private: yes
-
-    - name: "domainname"
-      prompt: "Set your domain name for your server"
-      private: no
 
     - name: "sendgriduser"
       prompt: "Enter your sendgrid username"

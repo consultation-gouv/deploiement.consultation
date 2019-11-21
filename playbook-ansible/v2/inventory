@@ -1,0 +1,8 @@
+[local_vm]
+172.16.25.102
+
+[pprod]
+pprod.consultation.etalab.gouv.fr
+
+[production]
+consultation.etalab.gouv.fr
