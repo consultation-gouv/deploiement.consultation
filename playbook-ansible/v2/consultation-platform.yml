@@ -31,6 +31,22 @@
       prompt: "Set the password for the monitoring interface access, the username will be the app's user"
       private: yes
 
+  handlers:
+    - name: restart mongod
+      action: service name=mongod state=restarted
+
+    - name: restart nginx
+      action: service name=nginx state=restarted
+
+    - name: Stop monit service
+      service: name=monit state=stopped
+
+    - name: restart monit 
+      action: service name=monit state=restarted
+    
+    - name: restart ssh
+      action: service name=ssh state=restarted
+
   tasks:
   # - name: utf8 locale
   #   action: command sudo update-locale LC_ALL=C.UTF-8
@@ -95,31 +111,22 @@
   - name: Install pm2 logrotate
     command: pm2 install logrotate
 
-  - name: Stop monit service
-    service: name=monit state=stopped
-
   - name: Install pymongo module
     pip: name=pymongo
-
-  - name: Start mongod service
-    service: name=mongod state=started enabled=true
 
   - name: Configure mongodb DB superuser
     mongodb_user: database=admin name={{ mongosu }} password={{ mongosupass }} state=present roles='root'
     no_log: true
+    notify: restart mongod
 
-  - name: Restart mongod service
-    service: name=mongod state=restarted enabled=true
 
   - name: Configure mongodb DB {{ user }} user
     mongodb_user: login_user={{ mongosu }} login_password={{ mongosupass }} database=db_deploy name={{ user }} password={{ mongogppass }} state=present roles='readWrite'
     no_log: true
+    notify: restart mongod
 
   - name: Set mongodb PID file
     file: src=/var/lib/mongodb/mongod.lock dest=/var/run/mongod.pid state=link
-
-  - name: Restart mongod service
-    service: name=mongod state=restarted enabled=true
 
   - name: Clone consultation-app from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/deploiement.consultation.git dest=/home/{{ user }}/consultation-app force=yes
@@ -149,28 +156,32 @@
 
   - name: Set app web front
     template: src=templates/nginx-front-ssl_app.conf dest=/etc/nginx/sites-available/deploiement.{{ domainname }}
+    notify: restart nginx
 
   - name: Set api web front
     template: src=templates/nginx-front-ssl_api.conf dest=/etc/nginx/sites-available/api.{{ domainname }}
+    notify: restart nginx
 
   - name: Set monitoring web front
     template: src=templates/nginx-front-ssl_monit.conf dest=/etc/nginx/sites-available/monitoring.{{ domainname }}
+    notify: restart nginx
 
   - name: enable app site
     file: src=/etc/nginx/sites-available/deploiement.{{ domainname }} dest=/etc/nginx/sites-enabled/deploiement.{{ domainname }} state=link
+    notify: restart nginx
 
   - name: enable api site
     file: src=/etc/nginx/sites-available/api.{{ domainname }} dest=/etc/nginx/sites-enabled/api.{{ domainname }} state=link
+    notify: restart nginx
 
   - name: enable main site
     file: src=/etc/nginx/sites-available/default dest=/etc/nginx/sites-enabled/default state=link
+    notify: restart nginx
 
   - name: enable monitoring site
     file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
     when: env == "production"
-
-  - name: restart nginx service
-    service: name=nginx state=restarted
+    notify: restart nginx
 
   - name: create .env file
     template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env
@@ -228,13 +239,9 @@
 
   - name: Set configuration for monitoring
     template: src=templates/monitconf dest=/etc/monit/monitrc
+    notify: restart monit
     no_log: true
-
-  - name: restart monit service
-    service: name=monit state=restarted
 
   - name: disable ssh root access without password
     lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin without-password" state=present
-
-  - name: restart ssh service
-    service: name=ssh state=restarted
+    notify: restart ssh
