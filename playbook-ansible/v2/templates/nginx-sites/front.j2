@@ -23,7 +23,11 @@ server {
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                 proxy_set_header X-NginX-Proxy true;
                 root /home/{{ user }}/consultation-website/_site/;
+		{% if item.1.find('agents.') >= 0 -%}
                 index index.html;
+		{% else -%}
+                index citoyens/index.html;
+		{% endif -%}
                 proxy_ssl_session_reuse off;
                 proxy_set_header Host $http_host;
                 proxy_cache_bypass $http_upgrade;
