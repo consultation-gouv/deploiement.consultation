@@ -1,5 +1,10 @@
 env: production
+
 domainname: consultation.etalab.gouv.fr
+extra_domains:
+  - participation-citoyenne.gouv.fr
+  - agents.participation-citoyenne.gouv.fr
+
 nginx_sites:
   - deploiement
   - api
