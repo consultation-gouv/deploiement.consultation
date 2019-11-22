@@ -154,37 +154,24 @@
   #   copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
   #   no_log: true
 
-  - name: Set website web front
-    template: src=templates/nginx-front-ssl_website.conf dest=/etc/nginx/sites-available/default
-
-  - name: Set app web front
-    template: src=templates/nginx-front-ssl_app.conf dest=/etc/nginx/sites-available/deploiement.{{ domainname }}
+  - name: define nginx sites
+    template:
+      src: "templates/nginx-sites/{{ item }}.j2"
+      dest: "/etc/nginx/sites-available/{{ item }}.{{ domainname }}"
+    with_items: "{{ nginx_sites }}"
     notify: restart nginx
+    tags:
+      - nginx
 
-  - name: Set api web front
-    template: src=templates/nginx-front-ssl_api.conf dest=/etc/nginx/sites-available/api.{{ domainname }}
+  - name: enable nginx sites
+    file:
+      src: "/etc/nginx/sites-available/{{ item }}.{{ domainname }}"
+      dest: "/etc/nginx/sites-enabled/{{ item }}.{{ domainname }}"
+      state: link
+    with_items: "{{ nginx_sites }}"
     notify: restart nginx
-
-  - name: Set monitoring web front
-    template: src=templates/nginx-front-ssl_monit.conf dest=/etc/nginx/sites-available/monitoring.{{ domainname }}
-    notify: restart nginx
-
-  - name: enable app site
-    file: src=/etc/nginx/sites-available/deploiement.{{ domainname }} dest=/etc/nginx/sites-enabled/deploiement.{{ domainname }} state=link
-    notify: restart nginx
-
-  - name: enable api site
-    file: src=/etc/nginx/sites-available/api.{{ domainname }} dest=/etc/nginx/sites-enabled/api.{{ domainname }} state=link
-    notify: restart nginx
-
-  - name: enable main site
-    file: src=/etc/nginx/sites-available/default dest=/etc/nginx/sites-enabled/default state=link
-    notify: restart nginx
-
-  - name: enable monitoring site
-    file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
-    when: env == "production"
-    notify: restart nginx
+    tags:
+      - nginx
 
   - name: create .env file
     template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env

@@ -1,2 +1,7 @@
 env: pprod
 domainname: pprod.consultation.etalab.gouv.fr
+nginx_sites:
+  - deploiement
+  - api
+  - front
+

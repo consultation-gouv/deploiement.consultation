@@ -1,2 +1,7 @@
 env: production
 domainname: consultation.etalab.gouv.fr
+nginx_sites:
+  - deploiement
+  - api
+  - front
+  - monitoring
