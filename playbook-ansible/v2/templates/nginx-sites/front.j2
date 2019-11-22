@@ -1,5 +1,5 @@
 server {
-       listen 80;
+       listen 80{% if item.1 == domainname %} default_server{% endif %};
        return 301 https://$host$request_uri;
 }
 
