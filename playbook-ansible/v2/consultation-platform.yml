@@ -139,16 +139,9 @@
 
   - name: Get SSL certificates
     command: "certbot certonly --authenticator webroot --webroot-path /var/www/html --domain {{ item }} --email {{ adminemail }} --agree-tos -n"
-    with_items:
-      - "{{ domainname }}"
-      - "api.{{ domainname }}"
-      - "deploiement.{{ domainname }}"
-
-  - name: Get SSL certificate for production monitoring
-    command: "certbot certonly --authenticator webroot --webroot-path /var/www/html --domain {{ item }} --email {{ adminemail }} --agree-tos -n"
-    with_items:
-      - "monitoring.{{ domainname }}"
-    when: env == "production"
+    loop: "{{ [domainname,] + extra_domains + nginx_sites | difference(['front']) | product([domainname,] + extra_domains) | map('join', '.') | list }}"
+    tags:
+      - letsencrypt
 
   # - name: Add images to consultation-app
   #   copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
