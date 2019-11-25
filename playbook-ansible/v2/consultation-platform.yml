@@ -234,6 +234,10 @@
     notify: restart monit
     no_log: true
 
-  - name: disable ssh root access without password
+  - name: disable ssh root access with password
     lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin without-password" state=present
+    notify: restart ssh
+
+  - name: disable ssh access with password
+    lineinfile: dest=/etc/ssh/sshd_config regexp="^PasswordAuthentication" line="PasswordAuthentication no" state=present
     notify: restart ssh
