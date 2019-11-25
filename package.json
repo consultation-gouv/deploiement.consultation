@@ -22,7 +22,7 @@
     "fs": "0.0.1-security",
     "helmet": "^3.1.0",
     "key-del": "^1.2.4",
-    "mongoose": "^4.6.6",
+    "mongoose": "^5.7.12",
     "morgan": "^1.7.0",
     "node-uuid": "^1.4.7",
     "nodemailer": "3.1.4",
