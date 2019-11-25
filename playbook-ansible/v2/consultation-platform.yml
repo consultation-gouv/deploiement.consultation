@@ -147,6 +147,14 @@
   #   copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
   #   no_log: true
 
+  - name: increase nginx server_names_hash_bucket_size
+    copy:
+      src: "file/nginx-hash-bucket-size.conf"
+      dest: "/etc/nginx/conf.d/hash-bucket-size.conf"
+    notify: restart nginx
+    tags:
+      - nginx
+
   - name: define nginx sites
     template:
       src: "templates/nginx-sites/{{ item.0 }}.j2"
