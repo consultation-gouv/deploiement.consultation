@@ -63,7 +63,7 @@ if failed port 27017 then restart
 
 #pm2 
 check process pm2 with pidfile /home/{{ user }}/.pm2/pm2.pid
-start program = "/usr/bin/sudo -u {{ user }} /bin/bash -lc 'cd /home/{{ user }}/deploiement.consultation ; /usr/bin/pm2 start ecosystem.json'"
+start program = "/usr/bin/sudo -u {{ user }} /bin/bash -lc 'cd /home/{{ user }}/consultation-app ; /usr/bin/pm2 start ecosystem.json'"
 stop program = "/usr/bin/sudo -u {{ user }} /bin/bash -lc '/usr/bin/pm2 kill'"
 
 # #NODE PLATFORM

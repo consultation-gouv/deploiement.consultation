@@ -1,0 +1,12 @@
+env: pprod
+
+domainname: pprod.consultation.etalab.gouv.fr
+extra_domains:
+  - pprod.participation-citoyenne.gouv.fr
+  - pprod.agents.participation-citoyenne.gouv.fr
+
+nginx_sites:
+  - deploiement
+  - api
+  - front
+

@@ -2,26 +2,7 @@
 - hosts: all
   remote_user: root
 
-  vars:
-    mongodump_archive: "consultation-tools.mongodump.gz"
-
   vars_prompt:
-    - name: "env"
-      prompt: "Choose the environment (pprod or production)"
-      private: no
-
-    - name: "user"
-      prompt: "Choose the app's username in the server"
-      private: no
-
-    - name: "adminemail"
-      prompt: "Set your contact email for certificate and monitoring alert"
-      private: no
-
-    - name: "mongosu"
-      prompt: "Set your mongodb superAdmin username"
-      private: no
-
     - name: "mongosupass"
       prompt: "Set your mongodb superAdmin password"
       private: yes
@@ -29,10 +10,6 @@
     - name: "mongogppass"
       prompt: "Set the mongodb password for the app's user "
       private: yes
-
-    - name: "domainname"
-      prompt: "Set your domain name for your server"
-      private: no
 
     - name: "sendgriduser"
       prompt: "Enter your sendgrid username"
@@ -54,6 +31,22 @@
       prompt: "Set the password for the monitoring interface access, the username will be the app's user"
       private: yes
 
+  handlers:
+    - name: restart mongod
+      action: service name=mongod state=restarted
+
+    - name: restart nginx
+      action: service name=nginx state=restarted
+
+    - name: Stop monit service
+      service: name=monit state=stopped
+
+    - name: restart monit 
+      action: service name=monit state=restarted
+    
+    - name: restart ssh
+      action: service name=ssh state=restarted
+
   tasks:
   # - name: utf8 locale
   #   action: command sudo update-locale LC_ALL=C.UTF-8
@@ -72,7 +65,7 @@
   - name: Add master public key to '{{ user }}' in instance
     authorized_key: user={{ user }} key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
-  - name: Ingore expiration on jessie sources
+  - name: Ignore expiration on jessie sources
     copy: src=file/apt-no-expiration.conf dest=/etc/apt/apt.conf.d/no-expiration.conf
 
   - name: Add repo in apt sources
@@ -85,8 +78,9 @@
     apt: update_cache=yes
 
   - name: Install required packages
-    apt: name={{ item }} state=present
-    with_items:
+    apt:
+      state: present
+      name:
         - git
         - curl
         - mongodb-org
@@ -97,8 +91,10 @@
         - ntpdate
 
   - name: Install certbot & python-certbot-nginx
-    apt: name={{ item }} state=present default_release=jessie-backports
-    with_items:
+    apt:
+      state: present
+      default_release: jessie-backports
+      name:
         - certbot
         - python-certbot-nginx
 
@@ -118,31 +114,22 @@
   - name: Install pm2 logrotate
     command: pm2 install logrotate
 
-  - name: Stop monit service
-    service: name=monit state=stopped
-
   - name: Install pymongo module
     pip: name=pymongo
-
-  - name: Start mongod service
-    service: name=mongod state=started enabled=true
 
   - name: Configure mongodb DB superuser
     mongodb_user: database=admin name={{ mongosu }} password={{ mongosupass }} state=present roles='root'
     no_log: true
+    notify: restart mongod
 
-  - name: Restart mongod service
-    service: name=mongod state=restarted enabled=true
 
   - name: Configure mongodb DB {{ user }} user
     mongodb_user: login_user={{ mongosu }} login_password={{ mongosupass }} database=db_deploy name={{ user }} password={{ mongogppass }} state=present roles='readWrite'
     no_log: true
+    notify: restart mongod
 
   - name: Set mongodb PID file
     file: src=/var/lib/mongodb/mongod.lock dest=/var/run/mongod.pid state=link
-
-  - name: Restart mongod service
-    service: name=mongod state=restarted enabled=true
 
   - name: Clone consultation-app from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/deploiement.consultation.git dest=/home/{{ user }}/consultation-app force=yes
@@ -152,48 +139,40 @@
 
   - name: Get SSL certificates
     command: "certbot certonly --authenticator webroot --webroot-path /var/www/html --domain {{ item }} --email {{ adminemail }} --agree-tos -n"
-    with_items:
-      - "{{ domainname }}"
-      - "api.{{ domainname }}"
-      - "deploiement.{{ domainname }}"
-
-  - name: Get SSL certificate for production monitoring
-    command: "certbot certonly --authenticator webroot --webroot-path /var/www/html --domain {{ item }} --email {{ adminemail }} --agree-tos -n"
-    with_items:
-      - "monitoring.{{ domainname }}"
-    when: env == "production"
+    loop: "{{ [domainname,] + extra_domains + nginx_sites | difference(['front']) | product([domainname,] + extra_domains) | map('join', '.') | list }}"
+    tags:
+      - letsencrypt
 
   # - name: Add images to consultation-app
   #   copy: src=~/consultation-app_ansible-playbook-v2/images dest=/home/{{ user }}/consultation-app/public/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
   #   no_log: true
 
-  - name: Set website web front
-    template: src=templates/nginx-front-ssl_website.conf dest=/etc/nginx/sites-available/default
+  - name: increase nginx server_names_hash_bucket_size
+    copy:
+      src: "file/nginx-hash-bucket-size.conf"
+      dest: "/etc/nginx/conf.d/hash-bucket-size.conf"
+    notify: restart nginx
+    tags:
+      - nginx
 
-  - name: Set app web front
-    template: src=templates/nginx-front-ssl_app.conf dest=/etc/nginx/sites-available/deploiement.{{ domainname }}
+  - name: define nginx sites
+    template:
+      src: "templates/nginx-sites/{{ item.0 }}.j2"
+      dest: "/etc/nginx/sites-available/{{ item.0 }}.{{ item.1 }}"
+    loop: "{{ nginx_sites | product([domainname,] + extra_domains) | list }}"
+    notify: restart nginx
+    tags:
+      - nginx
 
-  - name: Set api web front
-    template: src=templates/nginx-front-ssl_api.conf dest=/etc/nginx/sites-available/api.{{ domainname }}
-
-  - name: Set monitoring web front
-    template: src=templates/nginx-front-ssl_monit.conf dest=/etc/nginx/sites-available/monitoring.{{ domainname }}
-
-  - name: enable app site
-    file: src=/etc/nginx/sites-available/deploiement.{{ domainname }} dest=/etc/nginx/sites-enabled/deploiement.{{ domainname }} state=link
-
-  - name: enable api site
-    file: src=/etc/nginx/sites-available/api.{{ domainname }} dest=/etc/nginx/sites-enabled/api.{{ domainname }} state=link
-
-  - name: enable main site
-    file: src=/etc/nginx/sites-available/default dest=/etc/nginx/sites-enabled/default state=link
-
-  - name: enable monitoring site
-    file: src=/etc/nginx/sites-available/monitoring.{{ domainname }} dest=/etc/nginx/sites-enabled/monitoring.{{ domainname }} state=link
-    when: env == "production"
-
-  - name: restart nginx service
-    service: name=nginx state=restarted
+  - name: enable nginx sites
+    file:
+      src: "/etc/nginx/sites-available/{{ item }}"
+      dest: "/etc/nginx/sites-enabled/{{ item }}"
+      state: link
+    loop: "{{ nginx_sites | product([domainname,] + extra_domains) | map('join', '.') | list }}"
+    notify: restart nginx
+    tags:
+      - nginx
 
   - name: create .env file
     template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env
@@ -224,8 +203,17 @@
       - sudo -u {{ user }} bash -lc "pm2 stop 0"
       - sudo -u {{ user }} bash -lc "pm2 start 0"
 
+  - name: check if rvm 2.3.1 is installed
+    shell: "rvm list | grep {{ ruby_version }} && grep /usr/local/rvm/scripts/rvm ~/.bashrc"
+    register: rvm_ok
+    ignore_errors: true
+    changed_when: false
+    failed_when: false
+    check_mode: no # so the next step can pass in check mode
+
   - name: Install Ruby with RVM
-    script: file/install-rvm.sh
+    script: file/install-rvm.sh {{ ruby_version }}
+    when: rvm_ok.rc != 0
 
   - name: Install Jekyll, deps and generate website
     command: "{{ item }} chdir=/home/{{ user }}/consultation-website"
@@ -251,13 +239,13 @@
 
   - name: Set configuration for monitoring
     template: src=templates/monitconf dest=/etc/monit/monitrc
+    notify: restart monit
     no_log: true
 
-  - name: restart monit service
-    service: name=monit state=restarted
-
-  - name: disable ssh root access without password
+  - name: disable ssh root access with password
     lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin without-password" state=present
+    notify: restart ssh
 
-  - name: restart ssh service
-    service: name=ssh state=restarted
+  - name: disable ssh access with password
+    lineinfile: dest=/etc/ssh/sshd_config regexp="^PasswordAuthentication" line="PasswordAuthentication no" state=present
+    notify: restart ssh
