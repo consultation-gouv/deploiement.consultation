@@ -14,7 +14,7 @@
     "consultation-verification": "^0.5.0",
     "cookie-parser": "~1.4.3",
     "csv-parse": "^1.2.0",
-    "debug": "~2.2.0",
+    "debug": "~4.1.1",
     "dotenv": "^2.0.0",
     "express": "^4.14.0",
     "form-serializer": "^2.5.0",
