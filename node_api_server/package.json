@@ -16,7 +16,7 @@
     "connect": "^3.2.0",
     "dotenv": "^2.0.0",
     "js-yaml": "^3.3.0",
-    "mongoose": "^4.6.6",
+    "mongoose": "^5.7.7",
     "swagger-tools": "0.10.1"
   }
 }
