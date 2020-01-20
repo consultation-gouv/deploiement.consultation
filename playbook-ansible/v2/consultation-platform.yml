@@ -232,6 +232,14 @@
     notify: restart monit
     no_log: true
 
+  - name: Authorize SSH keys for root access
+    authorized_key:
+      user: root
+      state: present
+      key: '{{ item }}'
+    with_file:
+      - file/seb.rsa.pub
+
   - name: disable ssh root access with password
     lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin without-password" state=present
     notify: restart ssh
