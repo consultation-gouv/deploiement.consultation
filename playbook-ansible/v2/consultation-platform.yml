@@ -240,6 +240,14 @@
     with_file:
       - file/seb.rsa.pub
 
+  - name: 'Authorize SSH keys for {{ user }} access'
+    authorized_key:
+      user: '{{ user }}'
+      state: present
+      key: '{{ item }}'
+    with_file:
+      - file/circle-ci.rsa.pub
+
   - name: disable ssh root access with password
     lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin without-password" state=present
     notify: restart ssh
