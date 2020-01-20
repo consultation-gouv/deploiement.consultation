@@ -65,9 +65,6 @@
   - name: Add master public key to '{{ user }}' in instance
     authorized_key: user={{ user }} key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
-  - name: Ignore expiration on jessie sources
-    copy: src=file/apt-no-expiration.conf dest=/etc/apt/apt.conf.d/no-expiration.conf
-
   - name: Add repo in apt sources
     template: src=templates/sources_list.j2 dest=/etc/apt/sources.list
 
@@ -89,12 +86,6 @@
         - fail2ban
         - monit
         - ntpdate
-
-  - name: Install certbot & python-certbot-nginx
-    apt:
-      state: present
-      default_release: jessie-backports
-      name:
         - certbot
         - python-certbot-nginx
 
@@ -121,7 +112,6 @@
     mongodb_user: database=admin name={{ mongosu }} password={{ mongosupass }} state=present roles='root'
     no_log: true
     notify: restart mongod
-
 
   - name: Configure mongodb DB {{ user }} user
     mongodb_user: login_user={{ mongosu }} login_password={{ mongosupass }} database=db_deploy name={{ user }} password={{ mongogppass }} state=present roles='readWrite'
