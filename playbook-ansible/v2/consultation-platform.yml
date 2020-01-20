@@ -165,11 +165,11 @@
       - nginx
 
   - name: create .env file
-    template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env
+    template: src=templates/env_file.j2 dest=/home/{{ user }}/consultation-app/.env
     no_log: true
 
   - name: create .env file for api server
-    template: src=templates/env_file dest=/home/{{ user }}/consultation-app/node_api_server/.env
+    template: src=templates/env_file.j2 dest=/home/{{ user }}/consultation-app/node_api_server/.env
 
   - name: Change owner of consultation-app
     file: path={{ item }} owner={{ user }} group={{ user }} mode=u=rwX,g=rX,o=rX recurse=yes state=directory
@@ -218,7 +218,7 @@
       - /home/{{ user }}/consultation-website
 
   - name: create email-report.sh
-    template: src=templates/email-report.sh dest=/home/{{ user }}/consultation-app/email-report.sh mode=755
+    template: src=templates/email-report.sh.j2 dest=/home/{{ user }}/consultation-app/email-report.sh mode=755
 
   - name: install email-report cron
     when: env == "production"
@@ -228,7 +228,7 @@
       job: /home/{{ user }}/consultation-app/email-report.sh
 
   - name: Set configuration for monitoring
-    template: src=templates/monitconf dest=/etc/monit/monitrc
+    template: src=templates/monitconf.j2 dest=/etc/monit/monitrc
     notify: restart monit
     no_log: true
 
