@@ -178,10 +178,7 @@
     template: src=templates/env_file.j2 dest=/home/{{ user }}/consultation-app/node_api_server/.env
 
   - name: Change owner of consultation-app
-    file: path={{ item }} owner={{ user }} group={{ user }} mode=u=rwX,g=rX,o=rX recurse=yes state=directory
-    with_items:
-      - /home/{{ user }}/consultation-app
-      - /home/{{ user }}/consultation-app/node_modules
+    file: path="/home/{{ user }}/consultation-app" owner={{ user }} group={{ user }} mode=u=rwX,g=rX,o=rX recurse=yes state=directory
 
   - name: copy reference database dump to instance
     copy: src=file/{{ mongodump_archive }} dest=/home/{{ user }}/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
@@ -190,14 +187,13 @@
     command: "/usr/bin/mongorestore --gzip --archive={{ mongodump_archive }} chdir=/home/{{ user }}/"
 
   - name: Install required node packages and launch platform
+    become: true
+    become_user: "{{ user }}"
     command: "{{ item }} chdir=/home/{{ user }}/consultation-app"
     with_items:
-      # - npm install -g ogp-consultation-verification
       - npm install
-      - sudo -u {{ user }} bash -lc "cd /home/{{ user }}/consultation-app/node_api_server && npm install"
-      - sudo -u {{ user }} bash -lc "cd /home/{{ user }}/consultation-app && pm2 start ecosystem.json"
-      - sudo -u {{ user }} bash -lc "pm2 stop 0"
-      - sudo -u {{ user }} bash -lc "pm2 start 0"
+      - bash -lc "cd node_api_server && npm install"
+      - pm2 start ecosystem.json
 
   - name: check if rvm 2.3.1 is installed
     shell: "rvm list | grep {{ ruby_version }} && grep /usr/local/rvm/scripts/rvm ~/.bashrc"
