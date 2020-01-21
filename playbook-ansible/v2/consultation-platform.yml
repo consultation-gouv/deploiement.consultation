@@ -62,25 +62,22 @@
   - name: Add '{{ user }}' to sudoers
     template: src=templates/sudoers-user.j2 dest=/etc/sudoers validate='visudo -cf %s'
 
-  - name: Add master public key to '{{ user }}' in instance
-    authorized_key: user={{ user }} key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  - name: Set default sources
+    apt_repository:
+      repo: '{{ item }}'
+      update_cache: yes
+    loop:
+      - 'deb http://deb.debian.org/debian/ {{ ansible_distribution_release }} main'
+      - 'deb http://security.debian.org/ {{ ansible_distribution_release }}/updates main'
+      - 'deb http://deb.debian.org/debian {{ ansible_distribution_release }}-backports main'
 
-  - name: Add repo in apt sources
-    template: src=templates/sources_list.j2 dest=/etc/apt/sources.list
-
-  - name: Add apt key for mongodb repo
-    command: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-
-  - name: Update apt cache
-    apt: update_cache=yes
-
-  - name: Install required packages
+  - name: Install packages
     apt:
       state: present
       name:
         - git
         - curl
-        - mongodb-org
+        - gnupg2
         - nginx
         - python-pip
         - fail2ban
@@ -88,6 +85,21 @@
         - ntpdate
         - certbot
         - python-certbot-nginx
+
+  - name: Add mongo apt key
+    apt_key:
+      keyserver: hkp://keyserver.ubuntu.com:80
+      id: 4B7C549A058F8B6B
+
+  - name: Add mongo apt repository
+    apt_repository:
+      repo: 'deb http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/{{ mongo_version }} main'
+      update_cache: yes
+
+  - name: Install mongodb-org
+    apt:
+      state: present
+      name: mongodb-org
 
   - name: update date and hour
     command: ntpdate fr.pool.ntp.org
