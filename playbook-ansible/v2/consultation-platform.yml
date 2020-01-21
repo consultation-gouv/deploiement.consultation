@@ -105,6 +105,9 @@
       state: present
       name: mongodb-org
 
+  - name: Ensure mongod is running
+    systemd: name=mongod state=started enabled=true
+
   - name: Install pm2
     npm: name=pm2 global=yes
 
@@ -123,9 +126,6 @@
     mongodb_user: login_user={{ mongosu }} login_password={{ mongosupass }} database=db_deploy name={{ user }} password={{ mongogppass }} state=present roles='readWrite'
     no_log: true
     notify: restart mongod
-
-  - name: Set mongodb PID file
-    file: src=/var/lib/mongodb/mongod.lock dest=/var/run/mongod.pid state=link
 
   - name: Clone consultation-app from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/deploiement.consultation.git dest=/home/{{ user }}/consultation-app force=yes
