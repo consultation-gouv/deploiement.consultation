@@ -102,9 +102,6 @@
       state: present
       name: mongodb-org
 
-  - name: update date and hour
-    command: ntpdate fr.pool.ntp.org
-
   - name: Install NodeJS and NPM
     command: "{{ item }}"
     with_items:
