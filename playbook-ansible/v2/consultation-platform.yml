@@ -85,6 +85,7 @@
         - ntpdate
         - certbot
         - python-certbot-nginx
+        - unattended-upgrades
 
   - name: Add mongo apt key
     apt_key:
