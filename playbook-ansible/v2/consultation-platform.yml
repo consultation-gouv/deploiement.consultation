@@ -86,6 +86,9 @@
         - certbot
         - python-certbot-nginx
         - unattended-upgrades
+        - build-essential
+        - nodejs
+        - npm
 
   - name: Add mongo apt key
     apt_key:
@@ -101,13 +104,6 @@
     apt:
       state: present
       name: mongodb-org
-
-  - name: Install NodeJS and NPM
-    command: "{{ item }}"
-    with_items:
-        - sudo -u {{ user }} bash -lc "curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -"
-        - sudo -u {{ user }} bash -lc "sudo apt install -y nodejs"
-        - sudo -u {{ user }} bash -lc "sudo apt install -y build-essential"
 
   - name: Install pm2
     npm: name=pm2 global=yes
