@@ -189,14 +189,26 @@
   - name: fill in database from the dump
     command: "/usr/bin/mongorestore --gzip --archive={{ mongodump_archive }} chdir=/home/{{ user }}/"
 
-  - name: Install required node packages and launch platform
+  - name: Install required node packages for main app
     become: true
     become_user: "{{ user }}"
-    command: "{{ item }} chdir=/home/{{ user }}/consultation-app"
-    with_items:
-      - npm install
-      - bash -lc "cd node_api_server && npm install"
-      - pm2 start ecosystem.json
+    command:
+      cmd: npm install
+      chdir: "/home/{{ user }}/consultation-app"
+
+  - name: Install required node packages for api app
+    become: true
+    become_user: "{{ user }}"
+    command:
+      cmd: npm install
+      chdir: "/home/{{ user }}/consultation-app/node_api_server"
+
+  - name: Launch platform
+    become: true
+    become_user: "{{ user }}"
+    command:
+      cmd: pm2 start ecosystem.json
+      chdir: "/home/{{ user }}/consultation-app"
 
   - name: Install Jekyll, deps and generate website
     command: "{{ item }} chdir=/home/{{ user }}/consultation-website"
