@@ -196,6 +196,14 @@
       cmd: npm install
       chdir: "/home/{{ user }}/consultation-app"
 
+  - name: Hot-patch rand-token since we can't publish it to npmjs.com
+    copy:
+      src: file/node-rand-token-index.js
+      dest: /home/{{ user }}/consultation-app/node_modules/rand-token/index.js
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: "0644"
+
   - name: Install required node packages for api app
     become: true
     become_user: "{{ user }}"
