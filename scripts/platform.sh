@@ -2,7 +2,8 @@
 
 cd /usr/src/app
 npm install
-npm install nodemon -g
+npm start
+npm install nodemon@1.19.4 -g
 nodemon --debug=56745 bin/www 
 
 
