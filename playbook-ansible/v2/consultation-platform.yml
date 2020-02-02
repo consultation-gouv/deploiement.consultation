@@ -159,6 +159,13 @@
       src: "templates/nginx-sites/{{ item.0 }}.j2"
       dest: "/etc/nginx/sites-available/{{ item.0 }}.{{ item.1 }}"
     loop: "{{ nginx_sites | product([domainname,] + extra_domains) | list }}"
+    tags:
+      - nginx
+
+  - name: disable nginx default site
+    file:
+      dest: /etc/nginx/sites-enabled/default
+      state: absent
     notify: restart nginx
     tags:
       - nginx
