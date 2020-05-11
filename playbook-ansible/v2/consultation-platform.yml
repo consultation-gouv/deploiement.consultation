@@ -33,19 +33,19 @@
 
   handlers:
     - name: restart mongod
-      action: service name=mongod state=restarted
+      systemd: name=mongod state=restarted
 
     - name: restart nginx
-      action: service name=nginx state=restarted
+      systemd: name=nginx state=restarted
 
-    - name: Stop monit service
-      service: name=monit state=stopped
+    - name: stop monit service
+      systemd: name=monit state=stopped
 
     - name: restart monit 
-      action: service name=monit state=restarted
+      systemd: name=monit state=restarted
     
     - name: restart ssh
-      action: service name=ssh state=restarted
+      systemd: name=ssh state=restarted
 
   tasks:
   # - name: utf8 locale
@@ -62,51 +62,54 @@
   - name: Add '{{ user }}' to sudoers
     template: src=templates/sudoers-user.j2 dest=/etc/sudoers validate='visudo -cf %s'
 
-  - name: Add master public key to '{{ user }}' in instance
-    authorized_key: user={{ user }} key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  - name: Set default sources
+    apt_repository:
+      repo: '{{ item }}'
+      update_cache: yes
+    loop:
+      - 'deb http://deb.debian.org/debian/ {{ ansible_distribution_release }} main'
+      - 'deb http://security.debian.org/ {{ ansible_distribution_release }}/updates main'
+      - 'deb http://deb.debian.org/debian {{ ansible_distribution_release }}-backports main'
 
-  - name: Ignore expiration on jessie sources
-    copy: src=file/apt-no-expiration.conf dest=/etc/apt/apt.conf.d/no-expiration.conf
-
-  - name: Add repo in apt sources
-    template: src=templates/sources_list.j2 dest=/etc/apt/sources.list
-
-  - name: Add apt key for mongodb repo
-    command: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-
-  - name: Update apt cache
-    apt: update_cache=yes
-
-  - name: Install required packages
+  - name: Install packages
     apt:
       state: present
       name:
         - git
         - curl
-        - mongodb-org
+        - gnupg2
         - nginx
         - python-pip
         - fail2ban
         - monit
         - ntpdate
-
-  - name: Install certbot & python-certbot-nginx
-    apt:
-      state: present
-      default_release: jessie-backports
-      name:
         - certbot
         - python-certbot-nginx
+        - unattended-upgrades
+        - build-essential
+        - nodejs
+        - npm
+        - ruby
+        - ruby-dev
+        - zlib1g-dev
 
-  - name: update date and hour
-    command: ntpdate fr.pool.ntp.org
+  - name: Add mongo apt key
+    apt_key:
+      keyserver: hkp://keyserver.ubuntu.com:80
+      id: 4B7C549A058F8B6B
 
-  - name: Install NodeJS and NPM
-    command: "{{ item }}"
-    with_items:
-        - sudo -u {{ user }} bash -lc "curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -"
-        - sudo -u {{ user }} bash -lc "sudo apt install -y nodejs"
-        - sudo -u {{ user }} bash -lc "sudo apt install -y build-essential"
+  - name: Add mongo apt repository
+    apt_repository:
+      repo: 'deb http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/{{ mongo_version }} main'
+      update_cache: yes
+
+  - name: Install mongodb-org
+    apt:
+      state: present
+      name: mongodb-org
+
+  - name: Ensure mongod is running
+    systemd: name=mongod state=started enabled=true
 
   - name: Install pm2
     npm: name=pm2 global=yes
@@ -122,14 +125,10 @@
     no_log: true
     notify: restart mongod
 
-
   - name: Configure mongodb DB {{ user }} user
     mongodb_user: login_user={{ mongosu }} login_password={{ mongosupass }} database=db_deploy name={{ user }} password={{ mongogppass }} state=present roles='readWrite'
     no_log: true
     notify: restart mongod
-
-  - name: Set mongodb PID file
-    file: src=/var/lib/mongodb/mongod.lock dest=/var/run/mongod.pid state=link
 
   - name: Clone consultation-app from repository
     git: accept_hostkey=yes repo=https://github.com/consultation-gouv/deploiement.consultation.git dest=/home/{{ user }}/consultation-app force=yes
@@ -160,6 +159,13 @@
       src: "templates/nginx-sites/{{ item.0 }}.j2"
       dest: "/etc/nginx/sites-available/{{ item.0 }}.{{ item.1 }}"
     loop: "{{ nginx_sites | product([domainname,] + extra_domains) | list }}"
+    tags:
+      - nginx
+
+  - name: disable nginx default site
+    file:
+      dest: /etc/nginx/sites-enabled/default
+      state: absent
     notify: restart nginx
     tags:
       - nginx
@@ -175,17 +181,14 @@
       - nginx
 
   - name: create .env file
-    template: src=templates/env_file dest=/home/{{ user }}/consultation-app/.env
+    template: src=templates/env_file.j2 dest=/home/{{ user }}/consultation-app/.env
     no_log: true
 
   - name: create .env file for api server
-    template: src=templates/env_file dest=/home/{{ user }}/consultation-app/node_api_server/.env
+    template: src=templates/env_file.j2 dest=/home/{{ user }}/consultation-app/node_api_server/.env
 
   - name: Change owner of consultation-app
-    file: path={{ item }} owner={{ user }} group={{ user }} mode=u=rwX,g=rX,o=rX recurse=yes state=directory
-    with_items:
-      - /home/{{ user }}/consultation-app
-      - /home/{{ user }}/consultation-app/node_modules
+    file: path="/home/{{ user }}/consultation-app" owner={{ user }} group={{ user }} mode=u=rwX,g=rX,o=rX recurse=yes state=directory
 
   - name: copy reference database dump to instance
     copy: src=file/{{ mongodump_archive }} dest=/home/{{ user }}/ owner={{ user }} group={{ user }} mode="u=rw,g=r,o=r"
@@ -193,32 +196,39 @@
   - name: fill in database from the dump
     command: "/usr/bin/mongorestore --gzip --archive={{ mongodump_archive }} chdir=/home/{{ user }}/"
 
-  - name: Install required node packages and launch platform
-    command: "{{ item }} chdir=/home/{{ user }}/consultation-app"
-    with_items:
-      # - npm install -g ogp-consultation-verification
-      - npm install
-      - sudo -u {{ user }} bash -lc "cd /home/{{ user }}/consultation-app/node_api_server && npm install"
-      - sudo -u {{ user }} bash -lc "cd /home/{{ user }}/consultation-app && pm2 start ecosystem.json"
-      - sudo -u {{ user }} bash -lc "pm2 stop 0"
-      - sudo -u {{ user }} bash -lc "pm2 start 0"
+  - name: Install required node packages for main app
+    become: true
+    become_user: "{{ user }}"
+    command:
+      cmd: npm install
+      chdir: "/home/{{ user }}/consultation-app"
 
-  - name: check if rvm 2.3.1 is installed
-    shell: "rvm list | grep {{ ruby_version }} && grep /usr/local/rvm/scripts/rvm ~/.bashrc"
-    register: rvm_ok
-    ignore_errors: true
-    changed_when: false
-    failed_when: false
-    check_mode: no # so the next step can pass in check mode
+  - name: Hot-patch rand-token since we can't publish it to npmjs.com
+    copy:
+      src: file/node-rand-token-index.js
+      dest: /home/{{ user }}/consultation-app/node_modules/rand-token/index.js
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: "0644"
 
-  - name: Install Ruby with RVM
-    script: file/install-rvm.sh {{ ruby_version }}
-    when: rvm_ok.rc != 0
+  - name: Install required node packages for api app
+    become: true
+    become_user: "{{ user }}"
+    command:
+      cmd: npm install
+      chdir: "/home/{{ user }}/consultation-app/node_api_server"
+
+  - name: Launch platform
+    become: true
+    become_user: "{{ user }}"
+    command:
+      cmd: pm2 start ecosystem.json
+      chdir: "/home/{{ user }}/consultation-app"
 
   - name: Install Jekyll, deps and generate website
     command: "{{ item }} chdir=/home/{{ user }}/consultation-website"
     with_items:
-      - gem install bundle
+      - gem install bundler -v 1.17.1
       - bundle install
       - bundle exec jekyll build
 
@@ -228,7 +238,7 @@
       - /home/{{ user }}/consultation-website
 
   - name: create email-report.sh
-    template: src=templates/email-report.sh dest=/home/{{ user }}/consultation-app/email-report.sh mode=755
+    template: src=templates/email-report.sh.j2 dest=/home/{{ user }}/consultation-app/email-report.sh mode=755
 
   - name: install email-report cron
     when: env == "production"
@@ -238,9 +248,25 @@
       job: /home/{{ user }}/consultation-app/email-report.sh
 
   - name: Set configuration for monitoring
-    template: src=templates/monitconf dest=/etc/monit/monitrc
+    template: src=templates/monitconf.j2 dest=/etc/monit/monitrc
     notify: restart monit
     no_log: true
+
+  - name: Authorize SSH keys for root access
+    authorized_key:
+      user: root
+      state: present
+      key: '{{ item }}'
+    with_file:
+      - file/seb.rsa.pub
+
+  - name: 'Authorize SSH keys for {{ user }} access'
+    authorized_key:
+      user: '{{ user }}'
+      state: present
+      key: '{{ item }}'
+    with_file:
+      - file/circle-ci.rsa.pub
 
   - name: disable ssh root access with password
     lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin without-password" state=present
